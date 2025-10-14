@@ -5,6 +5,8 @@ import './App.css'
 import Welcome from './pages/Welcome'
 import Login from './pages/Login'
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import Menu from './pages/Menu';
+import { ShoppingCartProvider } from './contexts/ShoppingCart'
 
 function App() {
   
@@ -14,6 +16,8 @@ function App() {
         <Routes>
           <Route path="/" element={<Welcome />} />
           <Route path="/login" element={<Login />} />
+
+          <Route path="/menu" element={<ShoppingCartProvider><Menu /></ShoppingCartProvider>} />
         </Routes>
       </BrowserRouter>
     </>
