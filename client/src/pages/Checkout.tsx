@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-// import { ShoppingCart, Trash, X } from 'lucide-react';
 
 import './Checkout.css'
 
@@ -60,7 +59,7 @@ const ErrorNotification: React.FC<{ message: string; onClose: () => void }> = ({
         onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#DC2626'}
         onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
       >
-        <X style={{ width: '20px', height: '20px' }} />
+        X
       </button>
     </div>
   );
@@ -282,7 +281,6 @@ export default function FoodTruckCheckout() {
             onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#16a34a'}
             onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'var(--color-green)'}
           >
-            <ShoppingCart style={{ width: '20px', height: '20px' }}/>
             Start New Order
           </button>
         </div>
@@ -314,7 +312,6 @@ export default function FoodTruckCheckout() {
       {/* Main Content Area */}
       <div style={{ padding: '16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px' }}>
-          <ShoppingCart style={{ width: '32px', height: '32px', color: COLOR1 }} />
           <h1 style={{ fontSize: '30px', fontWeight: 'bold', color: '#1f2937', margin: 0 }}>Checkout</h1>
         </div>
 
@@ -750,7 +747,6 @@ export default function FoodTruckCheckout() {
                         }}
                         aria-label={`Remove ${item.name}`}
                       >
-                        <Trash style={{ width: '20px', height: '20px' }} />
                       </button>
                     </div>
                   ))}
