@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShoppingCart, Trash, X } from 'lucide-react';
+// import { ShoppingCart, Trash, X } from 'lucide-react';
 
 import './Checkout.css'
 
