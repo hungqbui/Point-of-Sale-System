@@ -3,7 +3,7 @@ import { ShoppingCartProvider } from './contexts/ShoppingCart'
 import { ToasterProvider } from './contexts/ToastContext.tsx'
 import Menu from './pages/Menu';
 import WelcomePage from './pages/WelcomePageDD' 
-import Login from './pages/Login.tsx';
+import Login from './pages/LoginPage.tsx';
 import Employee_Manager from './pages/Employee_Manager.tsx';
 import Checkout from './pages/Checkout.tsx';
 
