@@ -12,10 +12,23 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  /* Updated theme colors */
-  --color1: #28a745; /* green accent for primary buttons */
-  --color2: #dc3545; /* red for alerts or errors */
-  --color3: #17a2b8; /* teal for highlights */
+  --color1: green;
+  --color2: red;
+  --color3: green;
+
+  --toast-success: #4CAF50;
+  --toast-error: #f44336;
+  --toast-info: #2196F3;
+  --toast-warning: #ff9800;
+}
+
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+a:hover {
+  color: #535bf2;
 }
 
 body {

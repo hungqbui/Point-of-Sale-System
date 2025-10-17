@@ -1,5 +1,11 @@
-import { BrowserRouter, Routes, Route,} from 'react-router-dom';
-
+import { useState } from 'react'
+import reactLogo from './assets/react.svg'
+import viteLogo from '/vite.svg'
+import './App.css'
+import Welcome from './pages/Welcome'
+import Login from './pages/Login'
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Menu from './pages/Menu';
 import { ShoppingCartProvider } from './contexts/ShoppingCart'
 import { ToasterProvider } from './contexts/ToastContext.tsx'
 import WelcomePage from './pages/WelcomePageDD' 

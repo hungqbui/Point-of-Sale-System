@@ -21,7 +21,6 @@ export const ShoppingCartProvider: React.FC<{ children: React.ReactNode }> = ({ 
                 let temp = { ...prev };
 
                 temp[item.id].quantity += 1;
-                temp[item.id].price += item.price;
                 return temp;
             } else {
                 return { ...prev, [item.id]: { ...item, quantity: 1 } };
@@ -57,19 +56,23 @@ export const ShoppingCartProvider: React.FC<{ children: React.ReactNode }> = ({ 
         setItems((prev: any) => {
             if (!(itemId in prev)) return prev;
             const newItems = { ...prev };
+            const item = newItems[itemId];
+            if (!item || !item["price"]) {
+                return newItems;
+            }
             newItems[itemId].quantity += delta;
             if (newItems[itemId].quantity <= 0) {
                 delete newItems[itemId];
             }
+            console.log(total, grandTotal, tax, delta, item.price, item);
+            setTax((total + delta * item["price"]) * 0.1); // Example: 10% tax
+            setGrandTotal((total + delta * item["price"]) * 1.1);
+            setTotal(total + delta * item["price"]);
+            
+            
             return newItems;
+
         });
-        const item = items[itemId];
-        if (!item || !item.price) {
-            return;
-        }
-        setTotal(total + delta * item.price);
-        setTax((total + delta * item.price) * 0.1); // Example: 10% tax
-        setGrandTotal((total + delta * item.price) * 1.1);
     };
 
     const [total, setTotal] = useState(0);
