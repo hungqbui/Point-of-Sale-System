@@ -27,5 +27,10 @@
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.45.0",
     "vite": "^7.1.7"
-  }
+  },
+  "description": "Make pages in ```src/pages``` folder, and go to ```App.tsx``` use ```import``` then display.",
+  "main": "eslint.config.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }
