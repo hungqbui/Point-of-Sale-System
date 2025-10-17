@@ -1,8 +1,18 @@
 import "./WelcomePageDD.css";
 import {TopNav} from "../components/TopNav";
+import React, { useEffect, useState } from "react";
+
+import { fetchWelcomePage } from "../utils/fetchWelcomePage";
 
 export default function WelcomePageDD() {
-  
+
+  useEffect(() => {
+
+    fetchWelcomePage().then((data) => {
+      console.log("Welcome Page Data:", data);
+    });
+    
+  }, []);
 
   return (
     <div className="welcome-container">
