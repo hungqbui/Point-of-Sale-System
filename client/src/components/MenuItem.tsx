@@ -1,12 +1,15 @@
 import "./MenuItem.css"
 import { useShoppingCart } from "../contexts/ShoppingCart";
+import { useToaster } from "../contexts/ToastContext";
 
 const MenuItem = ({ item } : any) => {
     const { addItem } = useShoppingCart();
+    const { addToast } = useToaster();
     if (item.image) {
         return (
             <div className="menu-item" onClick={() => {
             addItem(item);
+            addToast(`Added ${item.name} to cart`, 'info', 2000);
         }}>
                 <img src={item.image} alt={item.name} className="menu-item-image" />
                 <span className="menu-item-name">{item.name}</span>
@@ -25,6 +28,7 @@ const MenuItem = ({ item } : any) => {
     return (
         <div className="menu-item menu-item-color" style={itemStyle} onClick={() => {
             addItem(item);
+            addToast(`Added ${item.name} to cart`, 'info', 2000);
         }}>
             {item.icon === '%' && <div className="menu-item-percent-icon">%</div>}
             <span className="menu-item-name">{item.name}</span>

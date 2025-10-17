@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import './SalePanel.css';
 import { useShoppingCart } from '../contexts/ShoppingCart';
-
+import { useToaster } from '../contexts/ToastContext';
 const OrderItem = ({ item }: any) => {
     const { adjustQuantity } = useShoppingCart();
+    const { addToast } = useToaster();
 
     return <div className="order-item order-item-animate">
         <div>
@@ -15,8 +16,10 @@ const OrderItem = ({ item }: any) => {
             {item.price} 
             <span><span className="adjust" onClick={() => {
                 adjustQuantity(item.id, -1);
+                addToast(`Removed x1 ${item.name} from cart`, 'info', 2000);
             }}>&lt;</span>x{item.quantity}<span className="adjust" onClick={() => {
                 adjustQuantity(item.id, 1);
+                addToast(`Added x1 ${item.name} to cart`, 'info', 2000);
             }}>&gt;</span></span>
 
             

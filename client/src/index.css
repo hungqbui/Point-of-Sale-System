@@ -15,6 +15,11 @@
   --color1: green;
   --color2: red;
   --color3: green;
+
+  --toast-success: #4CAF50;
+  --toast-error: #f44336;
+  --toast-info: #2196F3;
+  --toast-warning: #ff9800;
 }
 
 a {
