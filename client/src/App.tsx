@@ -6,6 +6,7 @@ import WelcomePage from './pages/WelcomePageDD'
 import Login from './pages/Login.tsx';
 import Employee_Manager from './pages/Employee_Manager.tsx';
 import Menu from './pages/Menu.tsx';
+import Checkout from './pages/Checkout.tsx';
 
 function App() {
   
@@ -19,6 +20,7 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/menu" element={<Menu />} />
               <Route path="/employee_manager" element={<Employee_Manager />} />
+              <Route path="/checkout" element={<Checkout />} />
             </Routes>
           </BrowserRouter>
         </ToasterProvider>
