@@ -1,22 +1,28 @@
 import { BrowserRouter, Routes, Route,} from 'react-router-dom';
-import Login from './pages/Login'
 
-import Menu from './pages/Menu';
 import { ShoppingCartProvider } from './contexts/ShoppingCart'
+import { ToasterProvider } from './contexts/ToastContext.tsx'
 import WelcomePage from './pages/WelcomePageDD' 
+import Login from './pages/Login.tsx';
+import Employee_Manager from './pages/Employee_Manager.tsx';
+import Menu from './pages/Menu.tsx';
 
 function App() {
   
   return (
-    <>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<WelcomePage />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<div>Sign up page</div>} />
-          <Route path="/menu" element={<div>Menu page</div>} />
-        </Routes>
-      </BrowserRouter>
+    <> 
+      <ShoppingCartProvider>
+        <ToasterProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<WelcomePage />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/menu" element={<Menu />} />
+              <Route path="/employee_manager" element={<Employee_Manager />} />
+            </Routes>
+          </BrowserRouter>
+        </ToasterProvider>
+      </ShoppingCartProvider>
     </>
   )
 }
