@@ -1,8 +1,8 @@
 import React from "react";
-import LoginPage from "./LoginPage";
+import UberLogin from "./UberLogin";
 
 function App() {
-  return <LoginPage />;
+  return <UberLogin />;
 }
 
 export default App;
