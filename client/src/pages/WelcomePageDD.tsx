@@ -5,11 +5,11 @@ import React, { useEffect, useState } from "react";
 import { fetchWelcomePage } from "../utils/fetchWelcomePage";
 
 export default function WelcomePageDD() {
-
+  const [welcomeData, setWelcomeData] = useState<any>(null);
   useEffect(() => {
 
     fetchWelcomePage().then((data) => {
-      console.log("Welcome Page Data:", data);
+      setWelcomeData(data);
     });
     
   }, []);
@@ -18,7 +18,7 @@ export default function WelcomePageDD() {
     <div className="welcome-container">
        <TopNav />  {/* ⬅️ new navbar */}
       <div className="welcome-card">
-        <h1 className="welcome-title">Food Truck POS (NAME HERE)</h1>
+        <h1 className="welcome-title">Food Truck POS {welcomeData?.name}</h1>
         <p className="welcome-subtitle">🚚 Fresh • Fast • Friendly</p>
 
         <div className="welcome-section">
