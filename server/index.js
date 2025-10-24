@@ -2,7 +2,9 @@
 import http from 'http';
 import { handleWelcome } from './routes/welcome.js';
 import { handleAuth } from './routes/auth.js';
+import { handleMenu } from './routes/menuData.js';
 
+import './db/connection.js';
 
 const hostname = '0.0.0.0';
 const port = 3000;
@@ -15,11 +17,8 @@ const server = http.createServer((req, res) => {
         res.statusCode = 200;
         res.setHeader('Content-Type', 'text/html');
         res.end('<h1>Welcome to the Homepage!</h1><p>This is a plain Node.js server.</p>');
-    } else if (method === 'GET' && url === '/api/menuItems') {
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify(menuItems));
-        // http://localhost:3000/api/welcomeData
+    } else if (method === 'GET' && url.startsWith('/api/menu/')) {
+        handleMenu(req, res);
     } else if (url.startsWith('/api/welcome')) {
         handleWelcome(req, res);
     } else if (url.startsWith('/api/auth')) {

@@ -21,8 +21,5 @@ db.connect((err) => {
     }
     console.log('Connected to the database.');
 
-    db.query("SELECT * FROM pos.Location", (err, results) => {
-        console.log(results);
-    })
 
 });

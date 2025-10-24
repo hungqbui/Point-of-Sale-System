@@ -1,8 +1,14 @@
 import { createContext, useContext }  from 'react';
 import { useState } from 'react';
+import type { MenuItem } from '../types/MenuItem';
+
+interface CartItem extends MenuItem {
+    quantity: number;
+}
+
 interface ShoppingCartContextType {
-    items: any[];
-    addItem: (item: any) => void;
+    items: Record<string, CartItem>;
+    addItem: (item: MenuItem) => void;
     removeItem: (itemId: string) => void;
     clearCart: () => void;
     adjustQuantity: (itemId: string, delta: number) => void;
@@ -13,61 +19,70 @@ interface ShoppingCartContextType {
 const ShoppingCartContext = createContext<ShoppingCartContextType | undefined>(undefined);
 
 export const ShoppingCartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [items, setItems] = useState<any>({});
-    const addItem = (item: any) => { 
-        setItems((prev : any) => {
+    const [items, setItems] = useState<Record<string, CartItem>>({});
+    const addItem = (item: MenuItem) => { 
+        setItems((prev) => {
             console.log('addItem called with:', item);
-            if (item.id in prev) {
-                let temp = { ...prev };
-
-                temp[item.id].quantity += 1;
+            const itemId = String(item.MenuItemID);
+            if (itemId in prev) {
+                const temp = { ...prev };
+                temp[itemId] = {
+                    ...temp[itemId],
+                    quantity: temp[itemId].quantity + 1
+                };
                 return temp;
             } else {
-                return { ...prev, [item.id]: { ...item, quantity: 1 } };
+                return { ...prev, [itemId]: { ...item, quantity: 1 } };
             }
         });
-        if (!item.price) return;
-        setTotal(total + item.price);
-        setTax((total + item.price) * 0.1); // Example: 10% tax
-        setGrandTotal(total + item.price + (total + item.price) * 0.1); 
+        const itemPrice = parseFloat(item.Price);
+        if (!itemPrice) return;
+        setTotal(total + itemPrice);
+        setTax((total + itemPrice) * 0.1); // Example: 10% tax
+        setGrandTotal(total + itemPrice + (total + itemPrice) * 0.1); 
      };
     const removeItem = (itemId: string) => { 
-        setItems((prev: any) => {
+        setItems((prev) => {
             if (!(itemId in prev)) return prev;
             const newItems = { ...prev };
             delete newItems[itemId];
             return newItems;
         });
         const item = items[itemId];
-        if (!item || !item.price) {
+        if (!item || !item.Price) {
             return;
         }
-        setTotal(total - item.price);
-        setTax((total - (item ? item.price : 0)) * 0.1); // Example: 10% tax
-        setGrandTotal(total - (item ? item.price : 0) + (total - (item ? item.price : 0)) * 0.1);
+        const itemPrice = parseFloat(item.Price);
+        setTotal(total - itemPrice);
+        setTax((total - itemPrice) * 0.1); // Example: 10% tax
+        setGrandTotal(total - itemPrice + (total - itemPrice) * 0.1);
      }
     const clearCart = () => {
-        setItems([]);
+        setItems({});
         setTotal(0);
         setTax(0);
         setGrandTotal(0);
     };
     const adjustQuantity = (itemId: string, delta: number) => {
-        setItems((prev: any) => {
+        setItems((prev) => {
             if (!(itemId in prev)) return prev;
             const newItems = { ...prev };
             const item = newItems[itemId];
-            if (!item || !item["price"]) {
+            if (!item || !item.Price) {
                 return newItems;
             }
-            newItems[itemId].quantity += delta;
+            newItems[itemId] = {
+                ...newItems[itemId],
+                quantity: newItems[itemId].quantity + delta
+            };
             if (newItems[itemId].quantity <= 0) {
                 delete newItems[itemId];
             }
-            console.log(total, grandTotal, tax, delta, item.price, item);
-            setTax((total + delta * item["price"]) * 0.1); // Example: 10% tax
-            setGrandTotal((total + delta * item["price"]) * 1.1);
-            setTotal(total + delta * item["price"]);
+            const itemPrice = parseFloat(item.Price);
+            console.log(total, grandTotal, tax, delta, itemPrice, item);
+            setTax((total + delta * itemPrice) * 0.1); // Example: 10% tax
+            setGrandTotal((total + delta * itemPrice) * 1.1);
+            setTotal(total + delta * itemPrice);
             
             
             return newItems;

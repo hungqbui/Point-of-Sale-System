@@ -2,24 +2,30 @@ import { useState } from 'react';
 import './SalePanel.css';
 import { useShoppingCart } from '../contexts/ShoppingCart';
 import { useToaster } from '../contexts/ToastContext';
-const OrderItem = ({ item }: any) => {
+import type { MenuItem } from '../types/MenuItem';
+
+interface CartItem extends MenuItem {
+    quantity: number;
+}
+
+const OrderItem = ({ item }: { item: CartItem }) => {
     const { adjustQuantity } = useShoppingCart();
     const { addToast } = useToaster();
 
     return <div className="order-item order-item-animate">
         <div>
-            <div className="order-item-name">{item.name}</div>
-            <div className="order-item-details">Large Fries</div>
-            <div className="order-item-details">Add Honey Mustard</div>
+            <div className="order-item-name">{item.Name}</div>
+            <div className="order-item-details">{item.Category}</div>
+            {item.Description && <div className="order-item-details">{item.Description}</div>}
         </div>
         <div className="order-item-price">
-            {item.price} 
+            ${item.Price} 
             <span><span className="adjust" onClick={() => {
-                adjustQuantity(item.id, -1);
-                addToast(`Removed x1 ${item.name} from cart`, 'info', 2000);
+                adjustQuantity(String(item.MenuItemID), -1);
+                addToast(`Removed x1 ${item.Name} from cart`, 'info', 2000);
             }}>&lt;</span>x{item.quantity}<span className="adjust" onClick={() => {
-                adjustQuantity(item.id, 1);
-                addToast(`Added x1 ${item.name} to cart`, 'info', 2000);
+                adjustQuantity(String(item.MenuItemID), 1);
+                addToast(`Added x1 ${item.Name} to cart`, 'info', 2000);
             }}>&gt;</span></span>
 
             
@@ -29,7 +35,7 @@ const OrderItem = ({ item }: any) => {
 
 const SalePanel = () => {
     const [activeTab, setActiveTab] = useState('Check');
-    const { items, total, tax, grandTotal } = useShoppingCart();
+    const { items, tax, grandTotal } = useShoppingCart();
     return (
         <aside id="sale-panel">
             <h2 id="sale-title">New sale</h2>
@@ -48,7 +54,7 @@ const SalePanel = () => {
                 </button>
             </div>
             <div id="sale-content">
-                {Object.values(items).map((item: any) => ( <OrderItem key={item.id} item={item} /> ))}
+                {Object.values(items).map((item: any) => ( <OrderItem key={item.MenuItemID} item={item} /> ))}
 
             </div>
             <div id="totals-section">
