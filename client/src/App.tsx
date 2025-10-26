@@ -6,6 +6,7 @@ import WelcomePage from './pages/WelcomePageDD'
 import Login from './pages/LoginPage.tsx';
 import Employee_Manager from './pages/Employee_Manager.tsx';
 import Checkout from './pages/Checkout.tsx';
+import MenuUserPage from './pages/MenuUserPage.tsx';
 
 function App() {
   
@@ -17,7 +18,8 @@ function App() {
             <Routes>
               <Route path="/" element={<WelcomePage />} />
               <Route path="/login" element={<Login />} />
-              <Route path="/menu" element={<Menu />} />
+              <Route path="/posmenu" element={<Menu />} />
+              <Route path="/menu" element={<MenuUserPage />} />
               <Route path="/employee_manager" element={<Employee_Manager />} />
               <Route path="/checkout" element={<Checkout />} />
             </Routes>

@@ -2,13 +2,24 @@ import { createContext, useContext }  from 'react';
 import { useState } from 'react';
 import type { MenuItem } from '../types/MenuItem';
 
+export interface ItemCustomization {
+    ingredientId: number;
+    ingredientName: string;
+    changeType: 'added' | 'removed' | 'substituted';
+    quantityDelta: number;
+    priceAdjustment: number; // Price adjustment for this ingredient
+}
+
 interface CartItem extends MenuItem {
     quantity: number;
+    customizations?: ItemCustomization[];
+    cartItemId: string; // Unique ID for cart item (to handle same item with different customizations)
+    adjustedPrice: number; // Base price + customization adjustments
 }
 
 interface ShoppingCartContextType {
     items: Record<string, CartItem>;
-    addItem: (item: MenuItem) => void;
+    addItem: (item: MenuItem, customizations?: ItemCustomization[]) => void;
     removeItem: (itemId: string) => void;
     clearCart: () => void;
     adjustQuantity: (itemId: string, delta: number) => void;
@@ -20,42 +31,89 @@ const ShoppingCartContext = createContext<ShoppingCartContextType | undefined>(u
 
 export const ShoppingCartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [items, setItems] = useState<Record<string, CartItem>>({});
-    const addItem = (item: MenuItem) => { 
+    
+    const calculateAdjustedPrice = (item: MenuItem, customizations?: ItemCustomization[]): number => {
+        let basePrice = parseFloat(item.Price);
+        
+        if (!customizations || customizations.length === 0) {
+            return basePrice;
+        }
+        
+        // Add price adjustments from customizations
+        const adjustmentTotal = customizations.reduce((total, custom) => {
+            // Only add price adjustments for substitutions and additions
+            if (custom.changeType === 'substituted' || custom.changeType === 'added') {
+                return total + (custom.priceAdjustment * Math.abs(custom.quantityDelta));
+            }
+            return total;
+        }, 0);
+        
+        return basePrice + adjustmentTotal;
+    };
+    
+    const generateCartItemId = (item: MenuItem, customizations?: ItemCustomization[]): string => {
+        // Create a unique ID based on item ID and customizations
+        if (!customizations || customizations.length === 0) {
+            return String(item.MenuItemID);
+        }
+
+        console.log('Generating cart item ID for item:', item, 'with customizations:', customizations);
+
+        const customizationString = customizations
+            .map(c => `${c.ingredientId}:${c.changeType}:${c.quantityDelta}`)
+            .sort()
+            .join('|');
+        return `${item.MenuItemID}-${btoa(customizationString).substring(0, 10)}`;
+    };
+    
+    const addItem = (item: MenuItem, customizations?: ItemCustomization[]) => { 
+        const adjustedPrice = calculateAdjustedPrice(item, customizations);
+        
         setItems((prev) => {
-            console.log('addItem called with:', item);
-            const itemId = String(item.MenuItemID);
-            if (itemId in prev) {
+            console.log('addItem called with:', item, 'customizations:', customizations);
+            const cartItemId = generateCartItemId(item, customizations);
+            
+            if (cartItemId in prev) {
                 const temp = { ...prev };
-                temp[itemId] = {
-                    ...temp[itemId],
-                    quantity: temp[itemId].quantity + 1
+                temp[cartItemId] = {
+                    ...temp[cartItemId],
+                    quantity: temp[cartItemId].quantity + 1
                 };
                 return temp;
             } else {
-                return { ...prev, [itemId]: { ...item, quantity: 1 } };
+                return { 
+                    ...prev, 
+                    [cartItemId]: { 
+                        ...item, 
+                        quantity: 1,
+                        customizations: customizations,
+                        cartItemId: cartItemId,
+                        adjustedPrice: adjustedPrice
+                    } 
+                };
             }
         });
-        const itemPrice = parseFloat(item.Price);
-        if (!itemPrice) return;
-        setTotal(total + itemPrice);
-        setTax((total + itemPrice) * 0.1); // Example: 10% tax
-        setGrandTotal(total + itemPrice + (total + itemPrice) * 0.1); 
+        
+        if (!adjustedPrice) return;
+        setTotal(total + adjustedPrice);
+        setTax((total + adjustedPrice) * 0.1); // Example: 10% tax
+        setGrandTotal(total + adjustedPrice + (total + adjustedPrice) * 0.1); 
      };
     const removeItem = (itemId: string) => { 
+        const item = items[itemId];
+        if (!item || !item.adjustedPrice) {
+            return;
+        }
         setItems((prev) => {
             if (!(itemId in prev)) return prev;
             const newItems = { ...prev };
             delete newItems[itemId];
             return newItems;
         });
-        const item = items[itemId];
-        if (!item || !item.Price) {
-            return;
-        }
-        const itemPrice = parseFloat(item.Price);
-        setTotal(total - itemPrice);
-        setTax((total - itemPrice) * 0.1); // Example: 10% tax
-        setGrandTotal(total - itemPrice + (total - itemPrice) * 0.1);
+        const itemTotal = item.adjustedPrice * item.quantity;
+        setTotal(total - itemTotal);
+        setTax((total - itemTotal) * 0.1); // Example: 10% tax
+        setGrandTotal(total - itemTotal + (total - itemTotal) * 0.1);
      }
     const clearCart = () => {
         setItems({});
@@ -64,13 +122,13 @@ export const ShoppingCartProvider: React.FC<{ children: React.ReactNode }> = ({ 
         setGrandTotal(0);
     };
     const adjustQuantity = (itemId: string, delta: number) => {
+        const item = items[itemId];
+        if (!item || !item.adjustedPrice) {
+            return;
+        }
         setItems((prev) => {
             if (!(itemId in prev)) return prev;
             const newItems = { ...prev };
-            const item = newItems[itemId];
-            if (!item || !item.Price) {
-                return newItems;
-            }
             newItems[itemId] = {
                 ...newItems[itemId],
                 quantity: newItems[itemId].quantity + delta
@@ -78,16 +136,13 @@ export const ShoppingCartProvider: React.FC<{ children: React.ReactNode }> = ({ 
             if (newItems[itemId].quantity <= 0) {
                 delete newItems[itemId];
             }
-            const itemPrice = parseFloat(item.Price);
-            console.log(total, grandTotal, tax, delta, itemPrice, item);
-            setTax((total + delta * itemPrice) * 0.1); // Example: 10% tax
-            setGrandTotal((total + delta * itemPrice) * 1.1);
-            setTotal(total + delta * itemPrice);
-            
-            
             return newItems;
-
         });
+        const priceChange = delta * item.adjustedPrice;
+        const newTotal = total + priceChange;
+        setTotal(newTotal);
+        setTax(newTotal * 0.1); // Example: 10% tax
+        setGrandTotal(newTotal * 1.1);
     };
 
     const [total, setTotal] = useState(0);

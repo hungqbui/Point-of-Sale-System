@@ -1,11 +1,12 @@
 class MenuItem {
     constructor(data = {}) {
-        this.menuItemID = data.menuItemID || null;
+        this.MIID = data.MIID || null;
         this.name = data.name || '';
         this.description = data.description || null;
         this.price = data.price || 0;
         this.category = data.category || null;
         this.availability = data.availability !== undefined ? data.availability : true;
+        this.imageURL = data.imageURL || null;
         this.createdAt = data.createdAt || null;
         this.lastUpdatedAt = data.lastUpdatedAt || null;
     }
@@ -70,10 +71,11 @@ class MenuItem {
      */
     toJSON() {
         return {
-            MenuItemID: this.menuItemID,
+            MIID: this.MIID,
             Name: this.name,
             Description: this.description,
             Price: this.price,
+            ImageURL: this.imageURL,
             Category: this.category,
             Availability: this.availability,
             CreatedAt: this.createdAt,
@@ -88,11 +90,12 @@ class MenuItem {
      */
     static fromDB(row) {
         return new MenuItem({
-            menuItemID: row.MenuItemID,
+            MIID: row.MIID,
             name: row.Name,
             description: row.Description,
             price: row.Price,
             category: row.Category,
+            imageURL: row.ImageURL,
             availability: row.Availability,
             createdAt: row.CreatedAt,
             lastUpdatedAt: row.LastUpdatedAt
@@ -136,9 +139,9 @@ class MenuItem {
             Availability: this.availability
         };
 
-        // Only include menuItemID if it exists
-        if (this.menuItemID) {
-            updateData.MenuItemID = this.menuItemID;
+        // Only include MIID if it exists
+        if (this.MIID) {
+            updateData.MIID = this.MIID;
         }
 
         return updateData;
@@ -148,16 +151,55 @@ class MenuItem {
 import { db } from '../db/connection.js';
 
 export const getAllMenuItems = async () => {
-    return new Promise((resolve, reject) => {
-        const query = "SELECT * FROM pos.Menu_Item";
+    const items = await new Promise((resolve, reject) => {
+        const query = `
+            SELECT *, MI.name as MIName, MI.MenuItemID as MIID, I.name as IName
+            FROM pos.Menu_Item as MI LEFT JOIN pos.Used_For as UF on MI.MenuItemID = UF.MenuItemID
+            LEFT JOIN pos.Ingredient as I ON UF.IngredientID = I.IngredientID
+            WHERE Availability = TRUE;
+        `;
         db.query(query, (err, results) => {
             if (err) {
                 reject(err);
             } else {
-                resolve(results.map(row => MenuItem.fromDB(row)));
+                resolve(results);
             }
         });
     });
+
+
+    let results = {};
+    for (const item of items) {
+
+        if (!results[item.MIID]) {
+            results[item.MIID] = {
+                MenuItemID: item.MIID,
+                Name: item.MIName,
+                Description: item.Description,
+                Price: item.Price,
+                Category: item.Category,
+                Availability: item.Availability,
+                ImageURL: item.ImageURL,
+                Ingredients: []
+            };
+        } 
+        if (item.IngredientID)
+            results[item.MIID].Ingredients.push({
+                IngredientID: item.IngredientID,
+                PriceAdjustment: item.PriceAdjustment,
+                Name: item.IName,
+                CustomizableCategory: item.CustomizableCategory || "Other",
+                QuantityRequired: item.QuantityRequired,
+                MaximumQuantity: item.MaxiumQuantity,
+                IsRemovable: item.IsRemovable,
+                IsRequired: item.IsRequired,
+                CanSubstitute: item.CanSubstitute
+            })
+    } 
+
+    console.log('Fetched menu items:', results);
+
+    return Object.values(results);
 }
 
 export default MenuItem;
