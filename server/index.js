@@ -3,6 +3,7 @@ import http from 'http';
 import { handleWelcome } from './routes/welcome.js';
 import { handleAuth } from './routes/auth.js';
 import { handleMenu } from './routes/menuData.js';
+import { handleReports } from "./routes/reportsData.js"
 
 import './db/connection.js';
 
@@ -13,6 +14,7 @@ const port = 3000;
 const server = http.createServer((req, res) => {
     const { url, method } = req;
     console.log(`${method} request for ${url}`);
+
     if (method === 'GET' && url === '/api') {
         res.statusCode = 200;
         res.setHeader('Content-Type', 'text/html');
@@ -23,6 +25,8 @@ const server = http.createServer((req, res) => {
         handleWelcome(req, res);
     } else if (url.startsWith('/api/auth')) {
         handleAuth(req, res);
+    } else if (url.startsWith('/api/reports')) {
+        handleReports(req, res); 
     } else {
         res.statusCode = 404;
         res.setHeader('Content-Type', 'text/html');
