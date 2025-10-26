@@ -20,6 +20,7 @@ const Employee_Manager: React.FC = () => {
   const [utilityType, setUtilityType] = useState('');
   const [totalAmount, setTotalAmount] = useState('');
   const [utilityDate, setUtilityDate] = useState('');
+  const [utilityLocation, setUtilityLocation] = useState('');
   const [utilitiesList, setUtilitiesList] = useState<any[]>([]);
 
   // ---------------- INVENTORY FORM ----------------
@@ -114,6 +115,7 @@ const Employee_Manager: React.FC = () => {
         type: utilityType,
         totalAmount: parseFloat(totalAmount),
         date: utilityDate,
+        locationName: utilityLocation,
       };
 
       const res = await fetch('http://localhost:3000/api/utilities', {
@@ -131,6 +133,7 @@ const Employee_Manager: React.FC = () => {
       setUtilityType('');
       setTotalAmount('');
       setUtilityDate('');
+      setUtilityLocation('');
 
       const refreshed = await fetch('http://localhost:3000/api/utilities');
       const updatedList = await refreshed.json();
@@ -305,7 +308,17 @@ const Employee_Manager: React.FC = () => {
                   <option value="water">Water</option>
                   <option value="electricity">Electricity</option>
                   <option value="gas">Gas</option>
+                  <option value="internet">Internet</option>
+                  <option value="phone">Phone</option>
+                  <option value="other">Other</option>
                 </select>
+                <label>Location:</label>
+                <input
+                  type="text"
+                  value={utilityLocation}
+                  onChange={e => setUtilityLocation(e.target.value)}
+                  style={{ width: '100%', marginBottom: '1rem' }}
+                />
                 <label>Total Amount:</label>
                 <input type="number" value={totalAmount} onChange={e => setTotalAmount(e.target.value)} style={{ width: '100%', marginBottom: '1rem' }} />
                 <label>Date:</label>
@@ -324,6 +337,7 @@ const Employee_Manager: React.FC = () => {
                           <th>Payment ID</th>
                           <th>Type</th>
                           <th>Amount</th>
+                          <th>Location</th>
                           <th>Date</th>
                         </tr>
                       </thead>
@@ -333,6 +347,7 @@ const Employee_Manager: React.FC = () => {
                             <td>{u.paymentId}</td>
                             <td>{u.type}</td>
                             <td>${u.totalAmount}</td>
+                            <td>{u.locationName ?? '—'}</td>
                             <td>{u.date}</td>
                           </tr>
                         ))}
