@@ -1,20 +1,28 @@
-// server/routes/inventoryRoutes.js
+import {
+  fetchInventoryOrders,
+  createInventoryOrder
+} from '../models/EmployeeManagerModel.js';
 
-// Temporary in-memory storage (resets when server restarts)
-let inventoryOrders = [
-  
-  
-];
+// server/routes/inventoryRoutes.js
 
 // --- Function to handle all /api/inventory routes ---
 export function handleInventoryRoutes(req, res) {
   const { url, method } = req;
 
-  // ✅ GET all inventory orders
+  // ✅ GET all inventory orders from database
   if (method === 'GET' && url === '/api/inventory') {
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(inventoryOrders));
+    fetchInventoryOrders()
+      .then(orders => {
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify(orders));
+      })
+      .catch(err => {
+        console.error('❌ Error fetching inventory orders:', err);
+        res.statusCode = 500;
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify({ error: 'Failed to fetch inventory orders' }));
+      });
     return true;
   }
 
@@ -28,18 +36,24 @@ export function handleInventoryRoutes(req, res) {
 
     req.on('end', () => {
       try {
-        const newOrder = JSON.parse(body);
-        newOrder.id = inventoryOrders.length + 1;
-
-        inventoryOrders.push(newOrder);
-        console.log('📦 New inventory order received:', newOrder);
-
-        res.statusCode = 201;
-        res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify({ message: 'Inventory order added successfully', order: newOrder }));
+        const payload = JSON.parse(body);
+        createInventoryOrder(payload)
+          .then(order => {
+            console.log('📦 New inventory order saved:', order);
+            res.statusCode = 201;
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ message: 'Inventory order added successfully', order }));
+          })
+          .catch(err => {
+            console.error('❌ Error saving inventory order:', err);
+            res.statusCode = 500;
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ error: 'Failed to save inventory order' }));
+          });
       } catch (err) {
         console.error('❌ Error handling /api/inventory POST:', err);
         res.statusCode = 400;
+        res.setHeader('Content-Type', 'application/json');
         res.end(JSON.stringify({ error: 'Invalid JSON data' }));
       }
     });
