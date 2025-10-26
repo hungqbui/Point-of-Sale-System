@@ -4,7 +4,7 @@ const profitPerLocation = async (startDate, endDate, desc = false) => {
     const order = desc ? 'DESC' : 'ASC';
     const query = `
         SELECT LocationName, SUM(TotalAmount) AS TotalProfit
-        FROM pos.Order_
+        FROM pos.Order
         WHERE OrderDate BETWEEN ? AND ?
         GROUP BY LocationName
         ORDER BY TotalProfit ${order};
@@ -24,7 +24,7 @@ const mostPopularItems = async (startDate, endDate, desc = false) => {
     const order = desc ? 'DESC' : 'ASC';
     const query = `
         SELECT MI.Name, COUNT(OI.MenuItemID) AS OrderCount
-        FROM pos.Order_ as O, pos.Menu_Item as MI, pos.Order_Item as OI
+        FROM pos.Order as O, pos.Menu_Item as MI, pos.Order_Item as OI
         WHERE O.OrderID = OI.OrderID AND OI.MenuItemID = MI.MenuItemID AND O.OrderDate BETWEEN ? AND ?
         GROUP BY MI.Name
         ORDER BY OrderCount ${order};
@@ -45,7 +45,7 @@ const employeePerformance = async (startDate, endDate, desc = false) => {
     const query = `
         SELECT E.FName, E.lname,  COUNT(O.OrderID) AS OrdersHandled, SUM(O.TotalAmount) AS TotalSales, SUM(T.ClockOutTime - T.ClockInTime) AS TotalHoursWorked
         FROM Staff AS E
-        JOIN Order_ AS O ON E.StaffID = O.StaffID
+        JOIN Order AS O ON E.StaffID = O.StaffID
         JOIN Timecard as T ON T.StaffID = E.StaffID
         WHERE  T.StaffID = E.StaffID AND  T.ClockOutTime is NOT NULL
         GROUP BY (E.StaffID)
@@ -62,7 +62,7 @@ const employeePerformance = async (startDate, endDate, desc = false) => {
     });
 }   
 
-employeePerformance(new Date('2025-10-21'), new Date('2025-10-22'), true)
-.then(results => console.log('Employee Performance:', results))
+mostPopularItems(new Date('2025-10-21'), new Date('2025-10-22'), true)
+.then(results => console.log('Profit Per Location:', results))
 
 export { profitPerLocation, mostPopularItems, employeePerformance };

@@ -24,7 +24,7 @@ const useClickOutside = (ref: React.RefObject<HTMLElement>, handler: () => void)
 };
 
 const ShoppingCartPanel = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
-    const { items, removeItem, adjustQuantity, tax, grandTotal, clearCart } = useShoppingCart();
+    const { items, removeItem, adjustQuantity, tax, grandTotal, clearCart, total } = useShoppingCart();
     const panelRef = useRef<HTMLDivElement>(null);
     const [isAnimating, setIsAnimating] = useState(false);
 
@@ -81,7 +81,7 @@ const ShoppingCartPanel = ({ isOpen, onClose }: { isOpen: boolean; onClose: () =
                                                 )}
                                                 {custom.changeType === 'substituted' && (
                                                     <span className="custom-substituted">
-                                                        → {custom.ingredientName}
+                                                        → {custom.ingredientName} +{custom.priceAdjustment.toFixed(2)}$
                                                     </span>
                                                 )}
                                                 {custom.changeType === 'added' && custom.quantityDelta > 0 && (
@@ -129,8 +129,12 @@ const ShoppingCartPanel = ({ isOpen, onClose }: { isOpen: boolean; onClose: () =
                         <span>Tax</span>
                         <span>${tax.toFixed(2)}</span>
                     </div>
-                    <div className="total-row grand-total">
+                    <div className="total-row">
                         <span>Total</span>
+                        <span>${total.toFixed(2)}</span>
+                    </div>
+                    <div className="total-row grand-total">
+                        <span>Grand Total</span>
                         <span>${Math.abs(grandTotal).toFixed(2)}</span>
                     </div>
                 </div>
