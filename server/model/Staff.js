@@ -203,7 +203,6 @@ class Staff {
     }
 }
 
-<<<<<<< HEAD
 export default Staff;
 
 import { db } from '../db/connection.js';
@@ -221,6 +220,3 @@ export const getCurrentWorkingStaff = async (locationName) => {
     const results = await db.query(query, [locationName]);
     return results.length > 0 ? Staff.fromDB(results[0]) : null;
 }
-=======
-export default Staff;
->>>>>>> DiegoDominguez

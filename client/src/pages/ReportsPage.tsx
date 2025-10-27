@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./ReportsPage.css";
 
 /* ========= Types from API ========= */
@@ -17,8 +18,7 @@ type EmployeePerfRow = {
   SalesPerHour?: number;             // derived on client
 };
 
-// If you have a dev proxy, keep empty string. Otherwise set to "http://localhost:3000".
-const API_BASE = "http://localhost:3000";
+const API_BASE = "";
 
 /* ========= Helpers ========= */
 const money = (n: number) =>
@@ -58,7 +58,16 @@ const haystackForRow = (row: any, type: ReportType) => {
   return `${fname} ${lname} ${row.OrdersHandled} ${row.TotalSales} ${row.TotalHoursWorked} ${row.SalesPerHour ?? ""}`;
 };
 
+const HomeIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" xmlns="http://www.w3.org/2000/svg" {...props}>
+    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+    <polyline points="9 22 9 12 15 12 15 22" />
+  </svg>
+);
+
 export default function ReportsPage() {
+  const navigate = useNavigate();
+  
   /* ---- Default range (last 7 days) ---- */
   const today = new Date();
   const to = today.toISOString().slice(0, 10);
@@ -173,6 +182,45 @@ export default function ReportsPage() {
 
   return (
     <div className="report-page">
+      {/* Home Button - Fixed Top Left */}
+      <button
+        onClick={() => navigate('/')}
+        style={{
+          position: 'fixed',
+          top: '16px',
+          left: '16px',
+          zIndex: 1000,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          padding: '10px 20px',
+          backgroundColor: 'white',
+          border: '2px solid #e5e7eb',
+          borderRadius: '12px',
+          fontSize: '16px',
+          fontWeight: 600,
+          color: '#374151',
+          cursor: 'pointer',
+          transition: 'all 0.2s',
+          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+        }}
+        onMouseOver={(e) => {
+          e.currentTarget.style.backgroundColor = '#f9fafb';
+          e.currentTarget.style.borderColor = '#d1d5db';
+          e.currentTarget.style.transform = 'translateX(-2px)';
+          e.currentTarget.style.boxShadow = '0 6px 8px rgba(0, 0, 0, 0.15)';
+        }}
+        onMouseOut={(e) => {
+          e.currentTarget.style.backgroundColor = 'white';
+          e.currentTarget.style.borderColor = '#e5e7eb';
+          e.currentTarget.style.transform = 'translateX(0)';
+          e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+        }}
+      >
+        <HomeIcon style={{ width: '20px', height: '20px' }} />
+        Home
+      </button>
+      
       {/* FORM */}
       <div className="card">
         <h1 className="page-title">Report Request</h1>
