@@ -44,17 +44,17 @@ const Employee_Manager: React.FC = () => {
 
   // ---------------- INITIAL LOAD ----------------
   useEffect(() => {
-    fetch('http://localhost:3000/api/menuItems')
+    fetch('/api/menuItems')
       .then(res => res.json())
       .then(data => console.log('✅ Backend menuItems response:', data))
       .catch(err => console.error('❌ MenuItems connection error:', err));
 
-    fetch('http://localhost:3000/api/utilities')
+    fetch('/api/utilities')
       .then(res => res.json())
       .then(data => setUtilitiesList(data))
       .catch(err => console.error('❌ Utilities fetch error:', err));
 
-    fetch('http://localhost:3000/api/inventory')
+    fetch('/api/inventory')
       .then(res => res.json())
       .then(data => setInventoryList(data))
       .catch(err => console.error('❌ Inventory fetch error:', err));
@@ -84,7 +84,7 @@ const Employee_Manager: React.FC = () => {
     };
 
     try {
-      const res = await fetch('http://localhost:3000/api/menuItems', {
+      const res = await fetch('/api/menuItems', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newItem),
@@ -118,7 +118,7 @@ const Employee_Manager: React.FC = () => {
         locationName: utilityLocation,
       };
 
-      const res = await fetch('http://localhost:3000/api/utilities', {
+      const res = await fetch('/api/utilities', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -135,7 +135,7 @@ const Employee_Manager: React.FC = () => {
       setUtilityDate('');
       setUtilityLocation('');
 
-      const refreshed = await fetch('http://localhost:3000/api/utilities');
+      const refreshed = await fetch('/api/utilities');
       const updatedList = await refreshed.json();
       setUtilitiesList(updatedList);
     } catch (err) {
@@ -157,7 +157,7 @@ const Employee_Manager: React.FC = () => {
         quantity: parseInt(quantity),
       };
 
-      const res = await fetch('http://localhost:3000/api/inventory', {
+      const res = await fetch('/api/inventory', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -176,7 +176,7 @@ const Employee_Manager: React.FC = () => {
       setCostPerUnit('');
       setQuantity('');
 
-      const refreshed = await fetch('http://localhost:3000/api/inventory');
+      const refreshed = await fetch('/api/inventory');
       const updatedList = await refreshed.json();
       setInventoryList(updatedList);
     } catch (err) {
