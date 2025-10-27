@@ -4,6 +4,7 @@ import { handleWelcome } from './routes/welcome.js';
 import { handleAuth } from './routes/auth.js';
 import { handleMenu } from './routes/menuData.js';
 import { handleCheckout } from './routes/checkout.js';
+import { handleInventoryRoutes } from './routes/inventoryRoutes.js';
 
 import './db/connection.js';
 
@@ -18,7 +19,7 @@ const server = http.createServer((req, res) => {
         res.statusCode = 200;
         res.setHeader('Content-Type', 'text/html');
         res.end('<h1>Welcome to the Homepage!</h1><p>This is a plain Node.js server.</p>');
-    } else if (method === 'GET' && url.startsWith('/api/menu/')) {
+    } else if (url.startsWith('/api/menu/')) {
         handleMenu(req, res);
     } else if (url.startsWith('/api/welcome')) {
         handleWelcome(req, res);
@@ -26,6 +27,8 @@ const server = http.createServer((req, res) => {
         handleAuth(req, res);
     } else if (url.startsWith('/api/checkout')) {
         handleCheckout(req, res);
+    } else if (url.startsWith('/api/inventory')) {
+        handleInventoryRoutes(req, res);
     } else {
         res.statusCode = 404;
         res.setHeader('Content-Type', 'text/html');

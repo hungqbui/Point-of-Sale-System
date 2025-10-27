@@ -9,7 +9,7 @@ import Checkout from './pages/Checkout.tsx';
 import MenuUserPage from './pages/MenuUserPage.tsx';
 
 function App() {
-  
+
   return (
     <> 
       <ToasterProvider>
