@@ -175,6 +175,7 @@ const MenuUserPage = () => {
     const [isCartOpen, setIsCartOpen] = useState(false);
     const { items } = useShoppingCart();
     const [isItemAdded, setIsItemAdded] = useState(false);
+    const navigate = useNavigate();
     
     const itemCount = Object.values(items).reduce((sum, item) => sum + item.quantity, 0);
 
@@ -191,6 +192,13 @@ const MenuUserPage = () => {
             <header className="user-header">
                 <h1 className="user-title">Our Menu</h1>
                 <div className="cart-container">
+                    <button className="home-button" onClick={() => navigate('/')}>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                            <polyline points="9 22 9 12 15 12 15 22"/>
+                        </svg>
+                        <span className="home-label">Home</span>
+                    </button>
                     <button className={`cart-button ${isItemAdded ? 'item-added' : ''}`} onClick={() => setIsCartOpen(prev => !prev)}>
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <circle cx="9" cy="21" r="1"/>

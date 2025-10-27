@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useShoppingCart } from './../contexts/ShoppingCart'
 import { useNavigate } from 'react-router-dom';
 import { createOrder } from '../utils/fetchOrder';
-
+import { useWelcomePage } from '../contexts/WelcomePageContext';
 import { useToaster } from '../contexts/ToastContext'; 
 
 const ShoppingCart: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
@@ -27,6 +27,13 @@ const X: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" xmlns="http://www.w3.org/2000/svg" {...props}>
     <line x1="18" y1="6" x2="6" y2="18" />
     <line x1="6" y1="6" x2="18" y2="18" />
+  </svg>
+);
+
+const ArrowLeft: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" xmlns="http://www.w3.org/2000/svg" {...props}>
+    <line x1="19" y1="12" x2="5" y2="12" />
+    <polyline points="12 19 5 12 12 5" />
   </svg>
 );
 
@@ -87,7 +94,7 @@ export default function FoodTruckCheckout() {
   //const customer = 
   const navigate = useNavigate();
   const { items, total: cartTotal, tax, grandTotal, adjustQuantity, clearCart, removeItem } = useShoppingCart();
-
+  const { pageData } = useWelcomePage();
   const { addToast } = useToaster();
 
   console.log('Items in cart:', items);
@@ -105,8 +112,7 @@ export default function FoodTruckCheckout() {
   const [showError, setShowError] = useState('');
 
   // --- Branding Constants ---
-  const TRUCK_NAME = 'FOOD TRUCK NAME';
-  const LOGO_TEXT = 'LOGO';
+  const TRUCK_NAME = pageData?.FoodTruckName || 'FOOD TRUCK NAME';
   // -------------------------
 
   // --- Styles (CSS Variables) ---
@@ -313,9 +319,6 @@ export default function FoodTruckCheckout() {
 
       {/* STICKY HEADER/LOGO SECTION */}
       <header style={headerStyle}>
-        <span style={logoStyle}>
-          {LOGO_TEXT}
-        </span>
         <span style={nameStyle}>
           {TRUCK_NAME}
         </span>
@@ -326,6 +329,45 @@ export default function FoodTruckCheckout() {
 
       {/* Main Content Area */}
       <div style={{ padding: '16px', maxWidth: '800px', margin: '0 auto' }}>
+        {/* Back Button - Fixed Top Left */}
+        <button
+          onClick={() => navigate('/menu')}
+          style={{
+            position: 'fixed',
+            top: '90px',
+            left: '16px',
+            zIndex: 1000,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '10px 20px',
+            backgroundColor: 'white',
+            border: '2px solid #e5e7eb',
+            borderRadius: '12px',
+            fontSize: '16px',
+            fontWeight: 600,
+            color: '#374151',
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.backgroundColor = '#f9fafb';
+            e.currentTarget.style.borderColor = '#d1d5db';
+            e.currentTarget.style.transform = 'translateX(-2px)';
+            e.currentTarget.style.boxShadow = '0 6px 8px rgba(0, 0, 0, 0.15)';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.backgroundColor = 'white';
+            e.currentTarget.style.borderColor = '#e5e7eb';
+            e.currentTarget.style.transform = 'translateX(0)';
+            e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+          }}
+        >
+          <ArrowLeft style={{ width: '20px', height: '20px' }} />
+          Back
+        </button>
+        
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
           <h1 style={{ fontSize: '30px', fontWeight: 'bold', color: '#1f2937', margin: 0 }}><ShoppingCart style={{ width: '24px', height: '24px' }} />   Checkout</h1>
         </div>

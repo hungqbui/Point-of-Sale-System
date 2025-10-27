@@ -61,6 +61,37 @@
     color: #1a1a1a;
 }
 
+.cart-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.home-button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 24px;
+    background: linear-gradient(145deg, #6c757d, #495057);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(108, 117, 125, 0.2);
+}
+
+.home-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(108, 117, 125, 0.3);
+}
+
+.home-label {
+    margin-left: 4px;
+}
+
 .cart-button {
     display: flex;
     align-items: center;
