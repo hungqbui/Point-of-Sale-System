@@ -29,7 +29,6 @@ function App() {
                 <Route path="/menu" element={<MenuUserPage />} />
                 <Route path="/employee_manager" element={<Employee_Manager />} />
                 <Route path="/checkout" element={<Checkout />} />
-
                 <Route path="/reports" element={<ReportsPage />} />
               </Routes>
             </BrowserRouter>

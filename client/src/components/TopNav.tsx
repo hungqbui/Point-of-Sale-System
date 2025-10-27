@@ -17,7 +17,7 @@ export function TopNav() {
         <Link to="/" className="brand">{ welcomeData?.FoodTruckName || "Food Truck POS" }</Link>
       </div>
       <div className="nav-right">
-        <Link to="/login" className="btn btn-primary">Log in</Link>
+        <Link to="/login" className="btn btn-primary-nav">Log in</Link>
         <Link to="/signup" className="btn btn-ghost">Sign up</Link>
       </div>
     </header>

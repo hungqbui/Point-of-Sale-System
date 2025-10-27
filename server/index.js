@@ -9,7 +9,6 @@ import { handleMenu } from './routes/menuData.js';
 import { handleCheckout } from './routes/checkout.js';
 import { handleInventoryRoutes } from './routes/inventoryRoutes.js';
 import { handleUtilityRoutes } from './routes/utilityRoutes.js';
-import { handleMenuRoutes } from './routes/menuRoutes.js';
 import { handleEditPage } from './routes/editpage.js';
 
 import './db/connection.js';
@@ -58,11 +57,6 @@ const server = http.createServer((req, res) => {
     if (url.startsWith('/uploads/')) {
         serveStaticFile(req, res);
         return;
-    }
-    if (method === 'GET' && url === '/api') {
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'text/html');
-        res.end('<h1>Welcome to the Homepage!</h1><p>This is a plain Node.js server.</p>');
     } else if (url.startsWith('/api/editpage')) {
         handleEditPage(req, res);
     } else if (url.startsWith('/api/menu/')) {
