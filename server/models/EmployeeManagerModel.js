@@ -1,14 +1,11 @@
 import { db } from '../db/connection.js';
 
-// Reuse a single promise-based connection
-const connection = db.promise();
-
 /**
  * Reads ingredient catalog entries for inventory selection.
  * @returns {Promise<Array<{id:number,name:string,cost:number}>>}
  */
 export async function fetchIngredients() {
-  const [rows] = await connection.query(`
+  const [rows] = await db.query(`
     SELECT
       IngredientID AS id,
       Name AS name,
@@ -29,7 +26,7 @@ export async function fetchIngredients() {
  * @returns {Promise<Array>} Menu items formatted for the frontend.
  */
 export async function fetchMenuItems() {
-  const [rows] = await connection.query(`
+  const [rows] = await db.query(`
     SELECT
       MenuItemID AS id,
       Name AS name,
@@ -94,7 +91,7 @@ export async function createMenuItem(payload) {
  * @returns {Promise<Array>}
  */
 export async function fetchUtilityPayments() {
-  const [rows] = await connection.query(`
+  const [rows] = await db.query(`
     SELECT
       PaymentID AS id,
       PaymentID AS paymentId,
@@ -161,7 +158,7 @@ export async function createUtilityPayment(payload) {
  * @returns {Promise<Array>}
  */
 export async function fetchInventoryOrders() {
-  const [rows] = await connection.query(`
+  const [rows] = await db.query(`
     SELECT
       s.ShipmentID AS id,
       s.Status AS status,
@@ -202,7 +199,7 @@ export async function createInventoryOrder(payload) {
 
   let ingredientId = null;
   if (ingredientItem) {
-    const [ingredientRows] = await connection.execute(
+    const [ingredientRows] = await db.execute(
       'SELECT IngredientID FROM Ingredient WHERE Name = ? LIMIT 1',
       [ingredientItem]
     );
