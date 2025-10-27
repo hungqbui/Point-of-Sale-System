@@ -5,6 +5,7 @@ import { handleAuth } from './routes/auth.js';
 import { handleMenu } from './routes/menuData.js';
 import { handleCheckout } from './routes/checkout.js';
 import { handleInventoryRoutes } from './routes/inventoryRoutes.js';
+import { handleUtilityRoutes } from './routes/utilityRoutes.js';
 
 import './db/connection.js';
 
@@ -29,6 +30,8 @@ const server = http.createServer((req, res) => {
         handleCheckout(req, res);
     } else if (url.startsWith('/api/inventory')) {
         handleInventoryRoutes(req, res);
+    } else if (url.startsWith('/api/utilities')) {
+        handleUtilityRoutes(req, res);
     } else {
         res.statusCode = 404;
         res.setHeader('Content-Type', 'text/html');

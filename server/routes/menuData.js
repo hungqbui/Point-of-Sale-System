@@ -9,10 +9,6 @@ export const handleMenu = async (req, res) => {
         res.setHeader('Content-Type', 'application/json');
         const menuItems = await getAllMenuItems();
         res.end(JSON.stringify(menuItems));
-    } else if (method === 'GET' && url === '/api/menu/createOrder') {
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify({ message: "Test endpoint reached" }));
     } else if (method === 'GET' && url === '/api/menu/viewOrders') {
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');

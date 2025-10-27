@@ -1,10 +1,8 @@
 import { db } from '../db/connection.js';
 
-// Reuse a single promise-based connection wrapper.
-const connection = db.promise();
 
 async function ensureColumns(tableName, columnDefinitions) {
-  const [rows] = await connection.query(
+  const [rows] = await db.query(
     `
       SELECT COLUMN_NAME
       FROM information_schema.COLUMNS
@@ -19,7 +17,7 @@ async function ensureColumns(tableName, columnDefinitions) {
   for (const definition of columnDefinitions) {
     const columnName = definition.split(/\s+/)[0];
     if (!existing.has(columnName.toLowerCase())) {
-      await connection.query(`ALTER TABLE ${tableName} ADD COLUMN ${definition}`);
+      await db.query(`ALTER TABLE ${tableName} ADD COLUMN ${definition}`);
     }
   }
 }
@@ -29,7 +27,7 @@ async function ensureColumns(tableName, columnDefinitions) {
  * The schema mirrors the fields used in Employee_Manager.tsx.
  */
 async function ensureUtilityPaymentTable() {
-  await connection.query(`
+  await db.query(`
     CREATE TABLE IF NOT EXISTS utility_payment (
       UtilityPaymentID INT AUTO_INCREMENT PRIMARY KEY,
       PaymentDate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -54,7 +52,7 @@ async function ensureUtilityPaymentTable() {
  * This table stores the management inventory orders captured in the UI.
  */
 async function ensureInventoryOrderTable() {
-  await connection.query(`
+  await db.query(`
     CREATE TABLE IF NOT EXISTS inventory_shipment (
       ShipmentID INT NOT NULL AUTO_INCREMENT,
       IngredientID INT,
@@ -83,7 +81,7 @@ async function ensureInventoryOrderTable() {
  * @returns {Promise<Array>} Menu items formatted for the frontend.
  */
 export async function fetchMenuItems() {
-  const [rows] = await connection.query(
+  const [rows] = await db.query(
     `
       SELECT
         MenuItemID AS id,
@@ -134,7 +132,7 @@ export async function createMenuItem(payload) {
   const normalizedCategory =
     (category && categoryMap[category.toLowerCase()]) || category || 'entree';
 
-  const [result] = await connection.execute(
+  const [result] = await db.execute(
     `
       INSERT INTO menu_item (Name, Description, Price, Category, Availability)
       VALUES (?, ?, ?, ?, ?)
@@ -159,7 +157,7 @@ export async function createMenuItem(payload) {
 export async function fetchUtilityPayments() {
   await ensureUtilityPaymentTable();
 
-  const [rows] = await connection.query(
+  const [rows] = await db.query(
     `
       SELECT
         UtilityPaymentID AS id,
@@ -200,7 +198,7 @@ export async function createUtilityPayment(payload) {
     : new Date().toISOString().slice(0, 19).replace('T', ' ');
   const locationName = payload.locationName || null;
 
-  const [result] = await connection.execute(
+  const [result] = await db.execute(
     `
       INSERT INTO utility_payment (PaymentCode, Type, TotalAmount, PaymentDate, Amount, UtilityType, LocationName)
       VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -232,7 +230,7 @@ export async function createUtilityPayment(payload) {
 export async function fetchInventoryOrders() {
   await ensureInventoryOrderTable();
 
-  const [rows] = await connection.query(
+  const [rows] = await db.query(
     `
       SELECT
         s.ShipmentID AS id,
@@ -288,7 +286,7 @@ export async function createInventoryOrder(payload) {
 
   let ingredientId = null;
   if (ingredientItem) {
-    const [ingredientRows] = await connection.execute(
+    const [ingredientRows] = await db.execute(
       'SELECT IngredientID FROM ingredient WHERE Name = ? LIMIT 1',
       [ingredientItem]
     );
@@ -306,7 +304,7 @@ export async function createInventoryOrder(payload) {
     ? new Date(receivedDate).toISOString().slice(0, 19).replace('T', ' ')
     : null;
 
-  const [result] = await connection.execute(
+  const [result] = await db.execute(
     `
       INSERT INTO inventory_shipment
         (SupplierName, Status, IngredientID, Cost, QuantityReceived, ShipmentDate)
