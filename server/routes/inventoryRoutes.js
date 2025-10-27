@@ -1,6 +1,7 @@
 import {
   fetchInventoryOrders,
-  createInventoryOrder
+  createInventoryOrder,
+  fetchIngredients
 } from '../models/EmployeeManagerModel.js';
 
 // server/routes/inventoryRoutes.js
@@ -8,6 +9,22 @@ import {
 // --- Function to handle all /api/inventory routes ---
 export function handleInventoryRoutes(req, res) {
   const { url, method } = req;
+
+  if (method === 'GET' && url === '/api/ingredients') {
+    fetchIngredients()
+      .then(ingredients => {
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify(ingredients));
+      })
+      .catch(err => {
+        console.error('❌ Error fetching ingredients:', err);
+        res.statusCode = 500;
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify({ error: 'Failed to fetch ingredients' }));
+      });
+    return true;
+  }
 
   // ✅ GET all inventory orders from database
   if (method === 'GET' && url === '/api/inventory') {
