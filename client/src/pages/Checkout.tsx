@@ -3,6 +3,8 @@ import { useShoppingCart } from './../contexts/ShoppingCart'
 import { useNavigate } from 'react-router-dom';
 import { createOrder } from '../utils/fetchOrder';
 
+import { useToaster } from '../contexts/ToastContext'; 
+
 const ShoppingCart: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" xmlns="http://www.w3.org/2000/svg" {...props}>
     <circle cx="9" cy="21" r="1.5" />
@@ -85,6 +87,9 @@ export default function FoodTruckCheckout() {
   //const customer = 
   const navigate = useNavigate();
   const { items, total: cartTotal, tax, grandTotal, adjustQuantity, clearCart, removeItem } = useShoppingCart();
+
+  const { addToast } = useToaster();
+
   console.log('Items in cart:', items);
   console.log('First item:', Object.values(items)[0]);
   const [formData, setFormData] = useState<FormData>({
@@ -96,7 +101,7 @@ export default function FoodTruckCheckout() {
     zipcode: '',
     cardName: ''
   });
-  const [orderPlaced, setOrderPlaced] = useState(true);
+  const [orderPlaced, setOrderPlaced] = useState(false);
   const [showError, setShowError] = useState('');
 
   // --- Branding Constants ---
@@ -205,16 +210,16 @@ export default function FoodTruckCheckout() {
           setShowError('');
           clearCart();
         } catch (err: any) {
-          setShowError(err.message || 'Something went wrong. Try again.');
+          addToast(err.message || 'Something went wrong. Try again.', "error");
         }
 
       } catch (err: any) {
         console.error(err);
-        setShowError('Unable to connect to server.');
+        addToast('Unable to connect to server.', "error");
       }
 
     } else {
-      setShowError('Please check all required (*) fields and card details are complete.');
+      addToast('Please check all required (*) fields and card details are complete.', "error");
     }
   };
 
@@ -321,18 +326,18 @@ export default function FoodTruckCheckout() {
 
       {/* Main Content Area */}
       <div style={{ padding: '16px', maxWidth: '800px', margin: '0 auto' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
           <h1 style={{ fontSize: '30px', fontWeight: 'bold', color: '#1f2937', margin: 0 }}><ShoppingCart style={{ width: '24px', height: '24px' }} />   Checkout</h1>
         </div>
 
         <div style={{
           display: 'grid',
           gridTemplateColumns: '1fr',
-          gap: '32px'
+          gap: '20px'
         }}>
 
           {/* Right Column - Customer Info & Payment */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             {/* Contact Information */}
             <div style={{
               backgroundColor: 'white',
@@ -384,7 +389,7 @@ export default function FoodTruckCheckout() {
               boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
               padding: '24px'
             }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                 <h2 style={{
                   fontSize: '20px',
                   fontWeight: 'bold',
@@ -535,7 +540,7 @@ export default function FoodTruckCheckout() {
           </div>
 
           {/* Left Column - Cart Items */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
             <div style={{
               backgroundColor: 'white',
               borderRadius: '16px',
@@ -765,7 +770,7 @@ export default function FoodTruckCheckout() {
                     justifyContent: 'space-between',
                     paddingTop: '12px',
                     fontSize: '24px',
-                    fontWeight: 800,
+                    fontWeight: 650,
                     color: '#1f2937'
                   }}>
                     <span>Total</span>
@@ -778,7 +783,7 @@ export default function FoodTruckCheckout() {
                     justifyContent: 'space-between',
                     paddingTop: '12px',
                     fontSize: '24px',
-                    fontWeight: 800,
+                    fontWeight: 650,
                     color: '#1f2937'
                   }}>
                     <span>Tax (10%)</span>
@@ -791,7 +796,7 @@ export default function FoodTruckCheckout() {
                     justifyContent: 'space-between',
                     paddingTop: '12px',
                     fontSize: '24px',
-                    fontWeight: 800,
+                    fontWeight: 650,
                     color: '#1f2937'
                   }}>
                     <span>Grand Total</span>
@@ -808,7 +813,7 @@ export default function FoodTruckCheckout() {
                     marginTop: '32px',
                     padding: '16px',
                     borderRadius: '12px',
-                    fontWeight: 800,
+                    fontWeight: 650,
                     fontSize: '20px',
                     border: 'none',
                     cursor: 'pointer',

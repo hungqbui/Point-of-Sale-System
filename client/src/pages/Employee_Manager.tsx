@@ -44,11 +44,6 @@ const Employee_Manager: React.FC = () => {
 
   // ---------------- INITIAL LOAD ----------------
   useEffect(() => {
-    fetch('/api/menuItems')
-      .then(res => res.json())
-      .then(data => console.log('✅ Backend menuItems response:', data))
-      .catch(err => console.error('❌ MenuItems connection error:', err));
-
     fetch('/api/utilities')
       .then(res => res.json())
       .then(data => setUtilitiesList(data))
