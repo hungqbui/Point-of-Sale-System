@@ -1,4 +1,5 @@
 import { findCustomerByEmail, createNewCustomer } from "../model/Customer.js";
+import { findStaffByEmail } from "../model/Staff.js";
 
 export const handleAuth = (req, res) => {
     const { method, url } = req;
@@ -27,7 +28,7 @@ export const handleAuth = (req, res) => {
             }
             res.statusCode = 200;
             res.setHeader('Content-Type', 'application/json');
-            res.end(JSON.stringify({ message: 'Login successful', customerID: customer.customerID }));
+            res.end(JSON.stringify({ message: 'Login successful', user: customer }));
         });
     } else if (method === 'POST' && url === '/api/auth/customer-register') {
         let body = '';
@@ -50,7 +51,7 @@ export const handleAuth = (req, res) => {
     
                 res.statusCode = 200;
                 res.setHeader('Content-Type', 'application/json');
-                res.end(JSON.stringify({ message: 'Registration successful', customerID: newCustomer.customerID }));
+                res.end(JSON.stringify({ message: 'Registration successful', user: newCustomer }));
             } catch (error) {
                 console.error('Error creating customer:', error);
                 res.statusCode = 400;
@@ -63,8 +64,28 @@ export const handleAuth = (req, res) => {
         req.on('data', chunk => {
             body += chunk.toString();
         });
-        req.on('end', () => {
+        req.on('end', async () => {
+            const { email, password } = JSON.parse(body);
+            const staff = await findStaffByEmail(email);
+            console.log('Staff found:', staff);
 
+            if (!staff) {
+                res.statusCode = 401;
+                res.setHeader('Content-Type', 'application/json');
+                res.end(JSON.stringify({ error: 'Invalid email or password' }));
+                return;
+            }
+            const isPasswordValid = await staff.validatePassword(password);
+            if (!isPasswordValid) {
+                res.statusCode = 401;
+                res.setHeader('Content-Type', 'application/json');
+                res.end(JSON.stringify({ error: 'Invalid email or password' }));
+                return;
+            }
+
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ message: 'Login successful', user: staff }));
         });
     } else {
         res.statusCode = 404;

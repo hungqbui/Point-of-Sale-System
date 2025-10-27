@@ -41,3 +41,8 @@
   border-color: #e5e7eb;
 }
 .btn-ghost:hover { background: #e5e7eb; }
+
+.nav-user-name {
+  font-weight: 500;
+  color: #111827;
+}

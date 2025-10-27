@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { ShoppingCartProvider } from './contexts/ShoppingCart'
 import { ToasterProvider } from './contexts/ToastContext.tsx'
 import { WelcomePageProvider } from './contexts/WelcomePageContext.tsx'
@@ -12,30 +12,51 @@ import ManagerDashboard from './pages/ManagerDashboard.tsx';
 import EditLandingPage from './pages/EditLandingPage.tsx';
 import ReportsPage from "./pages/ReportsPage.tsx"
 
-function App() {
+import { useAuth } from './contexts/AuthContext.tsx';
 
+
+const ProtectedRoute = ({ children }: any) => {
+  const { user } = useAuth();
+  
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+  return children;
+};
+
+const ManagerProtectedRoute = ({ children }: any) => {
+  const { user, userType } = useAuth();
+
+  if (!user || userType !== 'manager') {
+    return <Navigate to="/" replace />;
+  }
+  return children;
+};
+
+const LoginRoute = () => {
+  const { user } = useAuth();
+  
+  if (user) {
+    return <Navigate to="/" replace />;
+  }
+  return <Login />;
+};
+
+
+function App() {
   return (
-    <>
-      <ToasterProvider>
-        <ShoppingCartProvider>
-          <WelcomePageProvider>
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<WelcomePage />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/manager" element={<ManagerDashboard />} />
-                <Route path="/edit-landing" element={<EditLandingPage />} />
-                <Route path="/posmenu" element={<Menu />} />
-                <Route path="/menu" element={<MenuUserPage />} />
-                <Route path="/employee_manager" element={<Employee_Manager />} />
-                <Route path="/checkout" element={<Checkout />} />
-                <Route path="/reports" element={<ReportsPage />} />
-              </Routes>
-            </BrowserRouter>
-          </WelcomePageProvider>
-        </ShoppingCartProvider>
-      </ToasterProvider>
-    </>
+    <Routes>
+      <Route path="/" element={<WelcomePage />} />
+      <Route path="/login" element={<LoginRoute />} />
+      <Route path="/manager" element={
+        <ManagerProtectedRoute><ManagerDashboard /></ManagerProtectedRoute>} />
+      <Route path="/edit-landing" element={<ManagerProtectedRoute><EditLandingPage /></ManagerProtectedRoute>} />
+      <Route path="/posmenu" element={<Menu />} />
+      <Route path="/menu" element={<MenuUserPage />} />
+      <Route path="/employee_manager" element={<ManagerProtectedRoute><Employee_Manager /></ManagerProtectedRoute>} />
+      <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+      <Route path="/reports" element={<ManagerProtectedRoute><ReportsPage /></ManagerProtectedRoute>} />
+    </Routes>
   )
 }
 

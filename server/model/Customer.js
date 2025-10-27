@@ -396,9 +396,9 @@ export const createNewCustomer = async (customerData) => {
     const [result] = await db.execute(query, [
         dbObj.Email,
         dbObj.PasswordHash,
-        dbObj.PhoneNumber,
-        dbObj.Fname,
-        dbObj.Lname,
+        dbObj.PhoneNumber || null,
+        dbObj.Fname || null,
+        dbObj.Lname || null,
     ]);
 
     customer.customerID = result.insertId;

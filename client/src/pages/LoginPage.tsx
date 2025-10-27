@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./LoginPage.css";
-import { customerLogin, customerRegister } from "../utils/customerAuth";
 import { useToaster } from "../contexts/ToastContext";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -10,6 +10,7 @@ export default function LoginPage() {
   const [isRegistering, setIsRegistering] = useState(false);
   
   const { addToast } = useToaster();
+  const { login, register, loginStaff } = useAuth();
 
   // Form states
   const [email, setEmail] = useState('');
@@ -35,7 +36,7 @@ export default function LoginPage() {
         console.log('Customer Registration:', { firstName, lastName, email, phone, password });
 
         try {
-          const data = await customerRegister(firstName, lastName, email, phone, password);
+          const data = await register({ email, password, fname : firstName, lname: lastName, phoneNumber: phone });
           console.log('Registration successful:', data);
         }
         catch (error) {
@@ -47,7 +48,7 @@ export default function LoginPage() {
         console.log('Customer Login:', { email, password });
         
         try {
-          const data = await customerLogin(email, password);
+          const data = await login(email, password);
           console.log('Login successful:', data);
         } catch (error) {
           console.error('Login failed:', error);
@@ -59,6 +60,13 @@ export default function LoginPage() {
       // Handle staff login
       console.log('Staff Login:', { employeeEmail, password });
       // TODO: API call for staff login
+      try {
+        const data = await loginStaff(employeeEmail, password);
+        console.log('Staff Login successful:', data);
+      } catch (error) {
+        console.error('Staff Login failed:', error);
+        addToast('Staff Login failed. Please check your credentials and try again.', 'error');
+      }
     }
   };
   
