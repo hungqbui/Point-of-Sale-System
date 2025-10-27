@@ -10,20 +10,6 @@ import { handleInventoryRoutes } from './routes/inventoryRoutes.js'; // ✅ Moe 
 const hostname = '0.0.0.0'; // ✅ Updated hostname
 const port = 3000;
 
-// --- Sample Data (unchanged) ---
-const menuItems = [
-  { id: 1, name: '#1 Combo', price: 10.00, image: 'https://placehold.co/200x150/d3a47c/ffffff?text=Sandwich+1' },
-  { id: 2, name: '#2 Combo', price: 10.50, image: 'https://placehold.co/200x150/bca28e/ffffff?text=Sandwich+2' },
-  { id: 3, name: '#3 Combo', price: 9.50, image: 'https://placehold.co/200x150/e9c898/ffffff?text=Grilled+Cheese' },
-  { id: 4, name: '#4 Combo', price: 11.00, image: 'https://placehold.co/200x150/c5a78c/ffffff?text=Baguette' },
-  { id: 5, name: '#5 Combo', price: 12.00, image: 'https://placehold.co/200x150/d3b59f/ffffff?text=Sub' },
-  { id: 6, name: '#6 Combo', price: 9.75, image: 'https://placehold.co/200x150/c8d0b5/ffffff?text=Wrap' },
-  { id: 7, name: 'Grab & Go', count: 10, color: '#16a34a' },
-  { id: 8, name: 'Discounts', icon: '%', color: '#16a34a' },
-  { id: 9, name: 'Sides', icon: 'sides', color: '#f97316' },
-  { id: 10, name: 'Custom amount', icon: 'custom', color: '#f5f5f5' }
-];
-
 // --- Create HTTP Server ---
 const server = http.createServer((req, res) => {
   const { url, method } = req;
