@@ -6,6 +6,7 @@ import { handleMenu } from './routes/menuData.js';
 import { handleCheckout } from './routes/checkout.js';
 import { handleInventoryRoutes } from './routes/inventoryRoutes.js';
 import { handleUtilityRoutes } from './routes/utilityRoutes.js';
+import { handleMenuRoutes } from './routes/menuRoutes.js';
 
 import './db/connection.js';
 

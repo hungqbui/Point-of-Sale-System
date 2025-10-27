@@ -46,7 +46,7 @@ const Employee_Manager: React.FC = () => {
   useEffect(() => {
     fetch('/api/utilities')
       .then(res => res.json())
-      .then(data => setUtilitiesList(data))
+      .then(data => {setUtilitiesList(data), console.log('✅ Utilities fetch response:', data);})
       .catch(err => console.error('❌ Utilities fetch error:', err));
 
     fetch('/api/inventory')
@@ -341,7 +341,7 @@ const Employee_Manager: React.FC = () => {
                           <tr key={i} style={{ textAlign: 'center' }}>
                             <td>{u.paymentId}</td>
                             <td>{u.type}</td>
-                            <td>${u.totalAmount}</td>
+                            <td>${u.amount}</td>
                             <td>{u.locationName ?? '—'}</td>
                             <td>{u.date}</td>
                           </tr>
