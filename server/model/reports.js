@@ -10,14 +10,8 @@ const profitPerLocation = async (startDate, endDate, desc = false) => {
         ORDER BY TotalProfit ${order};
     `;
 
-    return new Promise((resolve, reject) => {
-        db.query(query, [startDate, endDate], (err, results) => {
-            if (err) {
-                return reject(err);
-            }
-            resolve(results);
-        });
-    });
+    const [results] = await db.query(query, [startDate, endDate]);
+    return results;
 }
 
 const mostPopularItems = async (startDate, endDate, desc = false) => {
@@ -30,14 +24,8 @@ const mostPopularItems = async (startDate, endDate, desc = false) => {
         ORDER BY OrderCount ${order};
     `;
 
-    return new Promise((resolve, reject) => {
-        db.query(query, [startDate, endDate], (err, results) => {
-            if (err) {
-                return reject(err);
-            }
-            resolve(results);
-        });
-    });
+    const [results] = await db.query(query, [startDate, endDate]);
+    return results;
 }
 
 const employeePerformance = async (startDate, endDate, desc = false) => {
@@ -52,14 +40,8 @@ const employeePerformance = async (startDate, endDate, desc = false) => {
         ORDER BY TotalSales ${order};
     `;
 
-    return new Promise((resolve, reject) => {
-        db.query(query, [startDate, endDate, startDate, endDate], (err, results) => {
-            if (err) {
-                return reject(err);
-            }
-            resolve(results);
-        });
-    });
+    const [results] = await db.query(query, [startDate, endDate, startDate, endDate]);
+    return results;
 }   
 
 mostPopularItems(new Date('2025-10-21'), new Date('2025-10-22'), true)

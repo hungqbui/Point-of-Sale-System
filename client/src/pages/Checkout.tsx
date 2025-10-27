@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import { useShoppingCart } from './../contexts/ShoppingCart'
+import { useNavigate } from 'react-router-dom';
+import { createOrder } from '../utils/fetchOrder';
 
 const ShoppingCart: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" xmlns="http://www.w3.org/2000/svg" {...props}>
@@ -27,20 +30,8 @@ const X: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
 
 import './Checkout.css'
 
-// Define the shape of a Cart Item for TypeScript
-interface CartItem {
-  id: number;
-  name: string;
-  price: number;
-  quantity: number;
-  image: string;
-}
-
 // Define the shape of the Form Data
 interface FormData {
-  name: string;
-  email: string;
-  phone: string;
   pickupTime: string;
   notes: string;
   cardNumber: string;
@@ -53,8 +44,8 @@ interface FormData {
 // Custom Error Notification Component
 const ErrorNotification: React.FC<{ message: string; onClose: () => void }> = ({ message, onClose }) => {
   return (
-    <div 
-      style={{ 
+    <div
+      style={{
         position: 'fixed',
         top: '8px',
         right: '16px',
@@ -71,8 +62,8 @@ const ErrorNotification: React.FC<{ message: string; onClose: () => void }> = ({
       }}
     >
       <div style={{ flex: 1, fontWeight: 500 }}>{message}</div>
-      <button 
-        onClick={onClose} 
+      <button
+        onClick={onClose}
         style={{
           padding: '4px',
           borderRadius: '9999px',
@@ -91,14 +82,12 @@ const ErrorNotification: React.FC<{ message: string; onClose: () => void }> = ({
 };
 
 export default function FoodTruckCheckout() {
-  const [cart, setCart] = useState<CartItem[]>([
-    { id: 1, name: 'Classic Burger', price: 6.99, quantity: 1, image: '🍔' },
-    { id: 2, name: 'Fries', price: 2.99, quantity: 2, image: '🍟' }
-  ]);
+  //const customer = 
+  const navigate = useNavigate();
+  const { items, total: cartTotal, tax, grandTotal, adjustQuantity, clearCart, removeItem } = useShoppingCart();
+  console.log('Items in cart:', items);
+  console.log('First item:', Object.values(items)[0]);
   const [formData, setFormData] = useState<FormData>({
-    name: '',
-    email: '', 
-    phone: '',
     pickupTime: '',
     notes: '',
     cardNumber: '',
@@ -107,26 +96,26 @@ export default function FoodTruckCheckout() {
     zipcode: '',
     cardName: ''
   });
-  const [orderPlaced, setOrderPlaced] = useState(false);
+  const [orderPlaced, setOrderPlaced] = useState(true);
   const [showError, setShowError] = useState('');
 
   // --- Branding Constants ---
-  const TRUCK_NAME = 'FOOD TRUCK NAME'; 
+  const TRUCK_NAME = 'FOOD TRUCK NAME';
   const LOGO_TEXT = 'LOGO';
   // -------------------------
 
   // --- Styles (CSS Variables) ---
   const COLOR1 = 'var(--color-primary)';
   const COLOR2 = 'var(--color-secondary)';
-  const COLOR3 = 'var(--color-light)'; 
-  const GRADIENT_START = 'var(--gradient-start)'; 
-  const GRADIENT_END = 'var(--gradient-end)';  
+  const COLOR3 = 'var(--color-light)';
+  const GRADIENT_START = 'var(--gradient-start)';
+  const GRADIENT_END = 'var(--gradient-end)';
 
   const headerStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
-    padding: '15px 20px', 
-    backgroundColor: '#fff', 
+    padding: '15px 20px',
+    backgroundColor: '#fff',
     borderBottom: '1px solid #ddd',
     position: 'sticky',
     top: 0,
@@ -138,12 +127,12 @@ export default function FoodTruckCheckout() {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    height: '45px', 
+    height: '45px',
     width: '45px',
     marginRight: '15px',
     borderRadius: '50%',
     backgroundColor: COLOR1,
-    color: '#fff', 
+    color: '#fff',
     fontWeight: 'bold',
     fontSize: '1.2em',
     flexShrink: 0,
@@ -152,32 +141,13 @@ export default function FoodTruckCheckout() {
 
   const nameStyle: React.CSSProperties = {
     fontSize: '1.6em',
-    fontWeight: '700', 
-    color: '#333', 
+    fontWeight: '700',
+    color: '#333',
     fontFamily: 'Inter, sans-serif',
   };
   // -------------------------
 
-  // update item quantity
-  const updateQuantity = (id: number, add: number): void => {
-    const updatedCart = cart.map(item => {
-      if (item.id === id) {
-        const newQuantity = item.quantity + add;
-        return newQuantity > 0 ? { ...item, quantity: newQuantity } : null;
-      }
-      return item;
-    }).filter((item): item is CartItem => item !== null);
-
-    setCart(updatedCart);
-  };
-
-  // remove item
-  const removeItem = (id: number): void => {
-    setCart(cart.filter(item => item.id !== id));
-  };
-
   // total price calculation
-  const total = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
 
   // collects inputs to form with formatting logic
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -191,7 +161,7 @@ export default function FoodTruckCheckout() {
 
     if (name === 'cardExpiry') {
       const digits = value.replace(/\D/g, '').substring(0, 4);
-      
+
       if (digits.length > 2) {
         newValue = `${digits.substring(0, 2)}/${digits.substring(2)}`;
       } else {
@@ -202,27 +172,58 @@ export default function FoodTruckCheckout() {
     setFormData({ ...formData, [name]: newValue });
   };
 
-  // check if info is entered before order placement
-  const handlePlaceOrder = (): void => {
+  const handlePlaceOrder = async (): Promise<void> => {
+    // Validate form first
     if (
-      formData.name && 
-      (formData.email || formData.phone) && 
       formData.cardNumber.replace(/\s/g, '').length === 16 &&
       formData.cardExpiry.length === 5 &&
       formData.cardCVC.length >= 3 &&
       formData.cardName
     ) {
-      setOrderPlaced(true);
-      setShowError('');
+      try {
+        // Prepare cart items
+        const itemsArray = Object.values(items).map(item => ({
+          id: item.MenuItemID,
+          price: item.Price,
+          customizations: item.customizations,
+          quantity: item.quantity
+        }));
+
+        const payload = {
+          userId: 1, // replace with real user id if available
+          orderItems: itemsArray,
+          total: grandTotal,
+          formData
+        };
+
+        console.log(payload);
+
+        try {
+          const data = await createOrder(payload);
+          console.log(data)
+          setOrderPlaced(true);
+          setShowError('');
+          clearCart();
+        } catch (err: any) {
+          setShowError(err.message || 'Something went wrong. Try again.');
+        }
+
+      } catch (err: any) {
+        console.error(err);
+        setShowError('Unable to connect to server.');
+      }
+
     } else {
       setShowError('Please check all required (*) fields and card details are complete.');
     }
   };
 
+
   // Success Confirmation Screen
   if (orderPlaced) {
     return (
-      <div 
+      <div
+        className="order-success-container"
         style={{
           minHeight: '100vh',
           display: 'flex',
@@ -233,7 +234,7 @@ export default function FoodTruckCheckout() {
           background: `linear-gradient(to bottom right, ${GRADIENT_START}, ${GRADIENT_END})`
         }}
       >
-        <div style={{
+        <div className="order-success-card" style={{
           backgroundColor: 'white',
           borderRadius: '24px',
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
@@ -263,30 +264,14 @@ export default function FoodTruckCheckout() {
             color: '#1f2937',
             marginBottom: '16px'
           }}>Order Confirmed!</h2>
-          <p style={{ 
-            color: '#4b5563', 
+          <p style={{
+            color: '#4b5563',
             marginBottom: '24px',
             fontWeight: 500
-          }}>Your food will be ready for **pickup in approximately 15 minutes**.</p>
-          <div style={{
-            width: '100%',
-            padding: '16px',
-            borderLeft: `4px solid #f97316`,
-            backgroundColor: COLOR3,
-            marginBottom: '24px',
-            textAlign: 'left'
-          }}>
-            <p style={{ fontSize: '14px', color: '#374151' }}>A confirmation will be sent to:</p>
-            <p style={{
-              fontWeight: 600,
-              color: '#1f2937',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap'
-            }}>{formData.email || formData.phone || 'Contact information not provided'}</p>
-          </div>
-          <button 
-            onClick={() => { setOrderPlaced(false); setCart([]); }}
+          }}>Your food will be ready for pickup</p>
+          
+          <button
+            onClick={() => { setOrderPlaced(false); clearCart(); }}
             style={{
               width: '100%',
               color: 'white',
@@ -320,7 +305,7 @@ export default function FoodTruckCheckout() {
       fontFamily: 'system-ui, -apple-system, sans-serif',
       backgroundColor: COLOR3
     }}>
-      
+
       {/* STICKY HEADER/LOGO SECTION */}
       <header style={headerStyle}>
         <span style={logoStyle}>
@@ -335,9 +320,9 @@ export default function FoodTruckCheckout() {
       {showError && <ErrorNotification message={showError} onClose={() => setShowError('')} />}
 
       {/* Main Content Area */}
-      <div style={{ padding: '16px' }}>
+      <div style={{ padding: '16px', maxWidth: '800px', margin: '0 auto' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px' }}>
-          <h1 style={{ fontSize: '30px', fontWeight: 'bold', color: '#1f2937', margin: 0 }}>Checkout</h1>
+          <h1 style={{ fontSize: '30px', fontWeight: 'bold', color: '#1f2937', margin: 0 }}><ShoppingCart style={{ width: '24px', height: '24px' }} />   Checkout</h1>
         </div>
 
         <div style={{
@@ -345,7 +330,7 @@ export default function FoodTruckCheckout() {
           gridTemplateColumns: '1fr',
           gap: '32px'
         }}>
-          
+
           {/* Right Column - Customer Info & Payment */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
             {/* Contact Information */}
@@ -361,87 +346,9 @@ export default function FoodTruckCheckout() {
                 color: '#1f2937',
                 marginBottom: '16px',
                 marginTop: 0
-              }}>Contact & Pickup</h2>
+              }}>Pickup Information</h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                
-                {/* Name */}
-                <div>
-                  <label htmlFor="name" style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: 500,
-                    color: '#374151',
-                    marginBottom: '8px'
-                  }}>Name <span style={{ color: '#ef4444' }}>*</span></label>
-                  <input 
-                    type="text" 
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    style={{
-                      width: '100%',
-                      padding: '12px 16px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '8px',
-                      fontSize: '16px',
-                      boxSizing: 'border-box'
-                    }}
-                  />
-                </div>
-                
-                {/* Email */}
-                <div>
-                  <label htmlFor="email" style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: 500,
-                    color: '#374151',
-                    marginBottom: '8px'
-                  }}>Email <span style={{ color: '#ef4444' }}>*</span></label>
-                  <input 
-                    type="email" 
-                    id="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    style={{
-                      width: '100%',
-                      padding: '12px 16px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '8px',
-                      fontSize: '16px',
-                      boxSizing: 'border-box'
-                    }}
-                  />
-                </div>
-                
-                {/* Phone */}
-                <div>
-                  <label htmlFor="phone" style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: 500,
-                    color: '#374151',
-                    marginBottom: '8px'
-                  }}>Phone</label>
-                  <input 
-                    type="tel" 
-                    id="phone"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    style={{
-                      width: '100%',
-                      padding: '12px 16px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '8px',
-                      fontSize: '16px',
-                      boxSizing: 'border-box'
-                    }}
-                  />
-                </div>
-                
+
                 {/* Pickup Time */}
                 <div>
                   <label htmlFor="pickupTime" style={{
@@ -451,8 +358,8 @@ export default function FoodTruckCheckout() {
                     color: '#374151',
                     marginBottom: '8px'
                   }}>Preferred Pickup Time</label>
-                  <input 
-                    type="time" 
+                  <input
+                    type="time"
                     id="pickupTime"
                     name="pickupTime"
                     value={formData.pickupTime}
@@ -485,7 +392,7 @@ export default function FoodTruckCheckout() {
                   margin: 0
                 }}>Payment Information</h2>
               </div>
-              
+
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 {/* Name on Card */}
                 <div>
@@ -496,8 +403,8 @@ export default function FoodTruckCheckout() {
                     color: '#374151',
                     marginBottom: '8px'
                   }}>Name on Card <span style={{ color: '#ef4444' }}>*</span></label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     id="cardName"
                     name="cardName"
                     value={formData.cardName}
@@ -522,8 +429,8 @@ export default function FoodTruckCheckout() {
                     color: '#374151',
                     marginBottom: '8px'
                   }}>Card Number <span style={{ color: '#ef4444' }}>*</span></label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     id="cardNumber"
                     name="cardNumber"
                     placeholder="XXXX XXXX XXXX XXXX"
@@ -540,7 +447,7 @@ export default function FoodTruckCheckout() {
                     }}
                   />
                 </div>
-                
+
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                   {/* Expiry Date */}
                   <div>
@@ -551,8 +458,8 @@ export default function FoodTruckCheckout() {
                       color: '#374151',
                       marginBottom: '8px'
                     }}>Expiry Date <span style={{ color: '#ef4444' }}>*</span></label>
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       id="cardExpiry"
                       name="cardExpiry"
                       value={formData.cardExpiry}
@@ -578,8 +485,8 @@ export default function FoodTruckCheckout() {
                       color: '#374151',
                       marginBottom: '8px'
                     }}>CVC <span style={{ color: '#ef4444' }}>*</span></label>
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       id="cardCVC"
                       name="cardCVC"
                       value={formData.cardCVC}
@@ -597,31 +504,31 @@ export default function FoodTruckCheckout() {
                     />
                   </div>
                   {/* Zip Code */}
-                <div>
-                  <label htmlFor="zipcode" style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: 500,
-                    color: '#374151',
-                    marginBottom: '8px'
-                  }}>Zip Code <span style={{ color: '#ef4444' }}>*</span></label>
-                  <input 
-                    type="text" 
-                    id="zipcode"
-                    name="zipcode"
-                    value={formData.zipcode}
-                    onChange={handleInputChange}
-                    maxLength={5}
-                    style={{
-                      width: '100%',
-                      padding: '12px 16px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '8px',
-                      fontSize: '16px',
-                      boxSizing: 'border-box'
-                    }}
-                  />
-                </div>
+                  <div>
+                    <label htmlFor="zipcode" style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      color: '#374151',
+                      marginBottom: '8px'
+                    }}>Zip Code <span style={{ color: '#ef4444' }}>*</span></label>
+                    <input
+                      type="text"
+                      id="zipcode"
+                      name="zipcode"
+                      value={formData.zipcode}
+                      onChange={handleInputChange}
+                      maxLength={5}
+                      style={{
+                        width: '100%',
+                        padding: '12px 16px',
+                        border: '1px solid #d1d5db',
+                        borderRadius: '8px',
+                        fontSize: '16px',
+                        boxSizing: 'border-box'
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -643,13 +550,13 @@ export default function FoodTruckCheckout() {
                 marginTop: 0,
                 borderBottom: '1px solid #e5e7eb',
                 paddingBottom: '12px'
-              }}>Your Order ({cart.length} items)</h2>
-              
-              {cart.length === 0 ? (
+              }}>Your Order ({Object.keys(items).length} items)</h2>
+              {Object.keys(items).length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '32px 0' }}>
                   <p style={{ color: '#6b7280', fontSize: '18px', marginBottom: '4px' }}>Your cart is empty</p>
                   <p style={{ fontSize: '14px', color: '#9ca3af', marginTop: '4px' }}>Add items to place an order!</p>
-                  <button 
+                  <button
+                    onClick={() => navigate('/menu')}
                     style={{
                       marginTop: '24px',
                       color: 'white',
@@ -668,28 +575,79 @@ export default function FoodTruckCheckout() {
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  {cart.map(item => (
-                    <div key={item.id} style={{
+                  {Object.values(items).map((item) => (
+                    <div key={item.cartItemId} style={{
                       display: 'flex',
                       alignItems: 'center',
                       gap: '16px',
                       padding: '12px 0',
                       borderBottom: '1px solid #f3f4f6'
                     }}>
-                      <div style={{ fontSize: '30px', flexShrink: 0 }}>{item.image}</div>
+                      <img src={item.ImageURL} alt={item.Name} style={{ maxWidth: '80px', maxHeight: '80px', objectFit: 'cover', borderRadius: '8px' }} />
                       <div style={{ flex: 1 }}>
-                        <h3 style={{ fontWeight: 600, color: '#1f2937', margin: 0, marginBottom: '4px' }}>{item.name}</h3>
-                        <p style={{ 
-                          fontWeight: 500, 
-                          fontSize: '14px', 
+                        <h3 style={{ fontWeight: 600, color: '#1f2937', margin: 0, marginBottom: '4px' }}>{item.Name}</h3>
+                        <p style={{
+                          fontWeight: 500,
+                          fontSize: '14px',
                           color: COLOR2,
-                          margin: 0
-                        }}>${item.price.toFixed(2)} / ea</p>
+                          margin: 0,
+                          marginBottom: item.customizations && item.customizations.length > 0 ? '8px' : 0
+                        }}>
+                          ${item.adjustedPrice ? item.adjustedPrice.toFixed(2) : parseFloat(item.Price).toFixed(2)} / ea
+                          {item.adjustedPrice && item.adjustedPrice !== parseFloat(item.Price) && (
+                            <span style={{
+                              textDecoration: 'line-through',
+                              marginLeft: '8px',
+                              color: '#9ca3af',
+                              fontSize: '12px'
+                            }}>
+                              ${parseFloat(item.Price).toFixed(2)}
+                            </span>
+                          )}
+                        </p>
+                        {item.customizations && item.customizations.length > 0 && (
+                          <div style={{
+                            display: 'flex',
+                            flexWrap: 'wrap',
+                            gap: '6px',
+                            marginTop: '6px'
+                          }}>
+                            {item.customizations.map((custom, idx) => (
+                              <span
+                                key={idx}
+                                style={{
+                                  fontSize: '11px',
+                                  padding: '3px 8px',
+                                  borderRadius: '12px',
+                                  fontWeight: 500,
+                                  backgroundColor:
+                                    custom.changeType === 'removed' ? '#fee2e2' :
+                                      custom.changeType === 'substituted' ? '#dbeafe' : '#d1fae5',
+                                  color:
+                                    custom.changeType === 'removed' ? '#991b1b' :
+                                      custom.changeType === 'substituted' ? '#1e40af' : '#065f46',
+                                  border: `1px solid ${custom.changeType === 'removed' ? '#fca5a5' :
+                                    custom.changeType === 'substituted' ? '#93c5fd' : '#6ee7b7'
+                                    }`
+                                }}
+                              >
+                                {custom.changeType === 'removed' && '− '}
+                                {custom.changeType === 'substituted' && '↔ '}
+                                {custom.changeType === 'added' && '+ '}
+                                {custom.ingredientName}
+                                {custom.quantityDelta > 1 && ` (×${custom.quantityDelta})`}
+                                {custom.priceAdjustment > 0 && custom.changeType !== 'removed' &&
+                                  ` (+$${custom.priceAdjustment.toFixed(2)})`
+                                }
+                              </span>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                      
+
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-                        <button 
-                          onClick={() => updateQuantity(item.id, -1)}
+                        <button
+                          onClick={() => adjustQuantity(item.cartItemId, -1)}
                           style={{
                             width: '32px',
                             height: '32px',
@@ -708,16 +666,20 @@ export default function FoodTruckCheckout() {
                           onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#e5e7eb'}
                           onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
                         >
-                        -
+                          -
                         </button>
-                        <span style={{ 
-                          width: '24px', 
-                          textAlign: 'center', 
-                          fontWeight: 'bold', 
-                          color: '#1f2937' 
+                        <span style={{
+                          width: '24px',
+                          textAlign: 'center',
+                          fontWeight: 'bold',
+                          color: '#1f2937'
                         }}>{item.quantity}</span>
-                        <button 
-                          onClick={() => updateQuantity(item.id, 1)}
+                        <button
+                          onClick={() => {
+                            console.log("clicked");
+
+                            adjustQuantity(item.cartItemId, 1)
+                          }}
                           style={{
                             width: '32px',
                             height: '32px',
@@ -740,18 +702,18 @@ export default function FoodTruckCheckout() {
                         </button>
                       </div>
 
-                      <div style={{ 
-                        fontWeight: 600, 
-                        color: '#374151', 
-                        width: '64px', 
-                        textAlign: 'right', 
-                        flexShrink: 0 
+                      <div style={{
+                        fontWeight: 600,
+                        color: '#374151',
+                        width: '64px',
+                        textAlign: 'right',
+                        flexShrink: 0
                       }}>
-                        ${(item.price * item.quantity).toFixed(2)}
+                        ${((item.adjustedPrice || parseFloat(item.Price)) * item.quantity).toFixed(2)}
                       </div>
-                      
-                      <button 
-                        onClick={() => removeItem(item.id)}
+
+                      <button
+                        onClick={() => removeItem(item.cartItemId)}
                         style={{
                           color: '#ef4444',
                           background: 'transparent',
@@ -770,8 +732,9 @@ export default function FoodTruckCheckout() {
                           e.currentTarget.style.color = '#ef4444';
                           e.currentTarget.style.backgroundColor = 'transparent';
                         }}
-                        aria-label={`Remove ${item.name}`}
+                        aria-label={`Remove ${item.Name}`}
                       >
+                        <Trash style={{ width: '20px', height: '20px' }} />
                       </button>
                     </div>
                   ))}
@@ -780,7 +743,7 @@ export default function FoodTruckCheckout() {
             </div>
 
             {/* Order Summary & Final Button */}
-            {cart.length > 0 && (
+            {Object.keys(items).length > 0 && (
               <div style={{
                 backgroundColor: 'white',
                 borderRadius: '16px',
@@ -805,12 +768,38 @@ export default function FoodTruckCheckout() {
                     fontWeight: 800,
                     color: '#1f2937'
                   }}>
+                    <span>Total</span>
+                    <span>${cartTotal.toFixed(2)}</span>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    paddingTop: '12px',
+                    fontSize: '24px',
+                    fontWeight: 800,
+                    color: '#1f2937'
+                  }}>
+                    <span>Tax (10%)</span>
+                    <span>${tax.toFixed(2)}</span>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    paddingTop: '12px',
+                    fontSize: '24px',
+                    fontWeight: 800,
+                    color: '#1f2937'
+                  }}>
                     <span>Grand Total</span>
-                    <span>${total.toFixed(2)}</span>
+                    <span>${grandTotal.toFixed(2)}</span>
                   </div>
                 </div>
 
-                <button 
+                <button
                   onClick={handlePlaceOrder}
                   style={{
                     width: '100%',
@@ -833,7 +822,7 @@ export default function FoodTruckCheckout() {
                   onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#6b0fd4'}
                   onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'var(--color-primary)'}
                 >
-                  Pay & Place Order - ${total .toFixed(2)}
+                  Pay & Place Order - ${grandTotal.toFixed(2)}
                 </button>
               </div>
             )}

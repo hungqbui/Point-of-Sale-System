@@ -1,9 +1,9 @@
-import mysql from 'mysql2'
+import mysql from 'mysql2/promise'
 import { loadEnv } from '../loadEnv.js';
 
 loadEnv();
 
-export const db = mysql.createConnection({
+export const db = await mysql.createConnection({
     host: process.env.URL || 'localhost',
     user: process.env.USER || 'root',
     password: process.env.PASSWORD || 'admin',
@@ -14,12 +14,4 @@ export const db = mysql.createConnection({
     }
 });
 
-db.connect((err) => {
-    if (err) {
-        console.error('Error connecting to the database:', err);
-        return;
-    }
-    console.log('Connected to the database.');
-
-
-});
+console.log('Connected to the database.');

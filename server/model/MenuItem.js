@@ -151,28 +151,19 @@ class MenuItem {
 import { db } from '../db/connection.js';
 
 export const getAllMenuItems = async () => {
-    const items = await new Promise((resolve, reject) => {
-        const query = `
-            SELECT *, MI.name as MIName, MI.MenuItemID as MIID, I.name as IName
-            FROM pos.Menu_Item as MI LEFT JOIN pos.Used_For as UF on MI.MenuItemID = UF.MenuItemID
-            LEFT JOIN pos.Ingredient as I ON UF.IngredientID = I.IngredientID
-            WHERE Availability = TRUE;
-        `;
-        db.query(query, (err, results) => {
-            if (err) {
-                reject(err);
-            } else {
-                resolve(results);
-            }
-        });
-    });
-
-
-    let results = {};
+    const query = `
+        SELECT *, MI.name as MIName, MI.MenuItemID as MIID, I.name as IName
+        FROM pos.Menu_Item as MI LEFT JOIN pos.Used_For as UF on MI.MenuItemID = UF.MenuItemID
+        LEFT JOIN pos.Ingredient as I ON UF.IngredientID = I.IngredientID
+        WHERE Availability = TRUE;
+    `;
+    const [results] = await db.query(query);
+    const items = results;
+    let final = {};
     for (const item of items) {
 
-        if (!results[item.MIID]) {
-            results[item.MIID] = {
+        if (!final[item.MIID]) {
+            final[item.MIID] = {
                 MenuItemID: item.MIID,
                 Name: item.MIName,
                 Description: item.Description,
@@ -184,7 +175,7 @@ export const getAllMenuItems = async () => {
             };
         } 
         if (item.IngredientID)
-            results[item.MIID].Ingredients.push({
+            final[item.MIID].Ingredients.push({
                 IngredientID: item.IngredientID,
                 PriceAdjustment: item.PriceAdjustment,
                 Name: item.IName,
@@ -197,9 +188,56 @@ export const getAllMenuItems = async () => {
             })
     } 
 
-    console.log('Fetched menu items:', results);
 
-    return Object.values(results);
+    return Object.values(final);
+}
+
+export const getMenuItemByIds = async (menuItemIds) => {
+    if (!menuItemIds || menuItemIds.length === 0) {
+        return [];
+    }
+
+    const placeholders = menuItemIds.map(() => '?').join(',');
+    const query = `
+        SELECT *, MI.name as MIName, MI.MenuItemID as MIID, I.name as IName
+        FROM pos.Menu_Item as MI LEFT JOIN pos.Used_For as UF on MI.MenuItemID = UF.MenuItemID
+        LEFT JOIN pos.Ingredient as I ON UF.IngredientID = I.IngredientID
+        WHERE MI.MenuItemID IN (${placeholders});
+    `;
+
+    const [results] = await db.query(query, menuItemIds);
+
+    let final = {};
+    for (const item of results) {
+
+        if (!final[item.MIID]) {
+            final[item.MIID] = {
+                MenuItemID: item.MIID,
+                Name: item.MIName,
+                Description: item.Description,
+                Price: item.Price,
+                Category: item.Category,
+                Availability: item.Availability,
+                ImageURL: item.ImageURL,
+                Ingredients: []
+            };
+        }
+        if (item.IngredientID)
+            final[item.MIID].Ingredients.push({
+                IngredientID: item.IngredientID,
+                PriceAdjustment: item.PriceAdjustment,
+                Name: item.IName,
+                CustomizableCategory: item.CustomizableCategory || "Other",
+                QuantityRequired: item.QuantityRequired,
+                MaximumQuantity: item.MaxiumQuantity,
+                IsRemovable: item.IsRemovable,
+                IsRequired: item.IsRequired,
+                CanSubstitute: item.CanSubstitute
+            })
+    }
+
+
+    return final;
 }
 
 export default MenuItem;

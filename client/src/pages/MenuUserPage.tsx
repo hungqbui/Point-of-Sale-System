@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import MenuPanel from '../components/MenuPanel';
 import './MenuUserPage.css';
 import { useShoppingCart } from '../contexts/ShoppingCart';
+import { useNavigate } from 'react-router-dom';
 
 // Custom hook to detect clicks outside a component
 const useClickOutside = (ref: React.RefObject<HTMLElement>, handler: () => void) => {
@@ -27,6 +28,8 @@ const ShoppingCartPanel = ({ isOpen, onClose }: { isOpen: boolean; onClose: () =
     const { items, removeItem, adjustQuantity, tax, grandTotal, clearCart, total } = useShoppingCart();
     const panelRef = useRef<HTMLDivElement>(null);
     const [isAnimating, setIsAnimating] = useState(false);
+
+    const navigate = useNavigate();
 
     useClickOutside(panelRef as React.RefObject<HTMLDivElement>, () => {
         setIsAnimating(false);
@@ -67,7 +70,19 @@ const ShoppingCartPanel = ({ isOpen, onClose }: { isOpen: boolean; onClose: () =
                             <div key={item.cartItemId || item.MenuItemID} className="cart-item">
                                 <div className="cart-item-info">
                                     <div className="cart-item-name">{item.Name}</div>
-                                    <div className="cart-item-price">${item.Price}</div>
+                                    <div className="cart-item-price">
+                                        ${item.adjustedPrice ? item.adjustedPrice.toFixed(2) : parseFloat(item.Price).toFixed(2)}
+                                        {item.adjustedPrice && item.adjustedPrice !== parseFloat(item.Price) && (
+                                            <span style={{ 
+                                                textDecoration: 'line-through', 
+                                                marginLeft: '6px', 
+                                                color: '#9ca3af',
+                                                fontSize: '0.85em'
+                                            }}>
+                                                ${parseFloat(item.Price).toFixed(2)}
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
                                 
                                 {item.customizations && item.customizations.length > 0 && (
@@ -81,12 +96,15 @@ const ShoppingCartPanel = ({ isOpen, onClose }: { isOpen: boolean; onClose: () =
                                                 )}
                                                 {custom.changeType === 'substituted' && (
                                                     <span className="custom-substituted">
-                                                        → {custom.ingredientName} +{custom.priceAdjustment.toFixed(2)}$
+                                                        → {custom.ingredientName}
+                                                        {custom.priceAdjustment > 0 && ` (+$${custom.priceAdjustment.toFixed(2)})`}
                                                     </span>
                                                 )}
                                                 {custom.changeType === 'added' && custom.quantityDelta > 0 && (
                                                     <span className="custom-added">
-                                                        + Extra {custom.ingredientName} ({custom.quantityDelta > 1 ? `x${custom.quantityDelta}` : ''})
+                                                        + Extra {custom.ingredientName}
+                                                        {custom.quantityDelta > 1 && ` (×${custom.quantityDelta})`}
+                                                        {custom.priceAdjustment > 0 && ` (+$${(custom.priceAdjustment * custom.quantityDelta).toFixed(2)})`}
                                                     </span>
                                                 )}
                                             </div>
@@ -142,7 +160,9 @@ const ShoppingCartPanel = ({ isOpen, onClose }: { isOpen: boolean; onClose: () =
                     <button className="clear-btn" onClick={clearCart} disabled={cartItems.length === 0}>
                         Clear Cart
                     </button>
-                    <button className="checkout-btn" disabled={cartItems.length === 0}>
+                    <button className="checkout-btn" disabled={cartItems.length === 0} onClick={() => {
+                        navigate("/checkout");
+                    }}>
                         Checkout
                     </button>
                 </div>

@@ -3,6 +3,7 @@ import http from 'http';
 import { handleWelcome } from './routes/welcome.js';
 import { handleAuth } from './routes/auth.js';
 import { handleMenu } from './routes/menuData.js';
+import { handleCheckout } from './routes/checkout.js';
 
 import './db/connection.js';
 
@@ -23,6 +24,8 @@ const server = http.createServer((req, res) => {
         handleWelcome(req, res);
     } else if (url.startsWith('/api/auth')) {
         handleAuth(req, res);
+    } else if (url.startsWith('/api/checkout')) {
+        handleCheckout(req, res);
     } else {
         res.statusCode = 404;
         res.setHeader('Content-Type', 'text/html');

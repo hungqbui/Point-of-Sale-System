@@ -3,8 +3,6 @@ import MenuItem, { getAllMenuItems } from "../model/MenuItem.js";
 
 export const handleMenu = async (req, res) => {
     const { method, url } = req;
-    
-    
 
     if (method === 'GET' && url === '/api/menu/items') {
         res.statusCode = 200;
