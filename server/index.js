@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import { handleWelcome } from './routes/welcome.js';
 import { handleAuth } from './routes/auth.js';
 import { handleMenu } from './routes/menuData.js';
+<<<<<<< HEAD
 import { handleCheckout } from './routes/checkout.js';
 import { handleInventoryRoutes } from './routes/inventoryRoutes.js';
 import { handleUtilityRoutes } from './routes/utilityRoutes.js';
@@ -16,10 +17,16 @@ import './db/connection.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+=======
+import { handleReports } from "./routes/reportsData.js"
+
+import './db/connection.js';
+>>>>>>> DiegoDominguez
 
 const hostname = '0.0.0.0';
 const port = 3000;
 
+<<<<<<< HEAD
 // Serve static files from uploads directory
 async function serveStaticFile(req, res) {
     try {
@@ -48,10 +55,13 @@ async function serveStaticFile(req, res) {
     }
 }
 
+=======
+>>>>>>> DiegoDominguez
 
 const server = http.createServer((req, res) => {
     const { url, method } = req;
     console.log(`${method} request for ${url}`);
+<<<<<<< HEAD
     
     // Serve static files from uploads directory
     if (url.startsWith('/uploads/')) {
@@ -59,24 +69,36 @@ const server = http.createServer((req, res) => {
         return;
     }
     
+=======
+
+>>>>>>> DiegoDominguez
     if (method === 'GET' && url === '/api') {
         res.statusCode = 200;
         res.setHeader('Content-Type', 'text/html');
         res.end('<h1>Welcome to the Homepage!</h1><p>This is a plain Node.js server.</p>');
+<<<<<<< HEAD
     } else if (url.startsWith('/api/editpage')) {
         handleEditPage(req, res);
     } else if (url.startsWith('/api/menu/')) {
+=======
+    } else if (method === 'GET' && url.startsWith('/api/menu/')) {
+>>>>>>> DiegoDominguez
         handleMenu(req, res);
     } else if (url.startsWith('/api/welcome')) {
         handleWelcome(req, res);
     } else if (url.startsWith('/api/auth')) {
         handleAuth(req, res);
+<<<<<<< HEAD
     } else if (url.startsWith('/api/checkout')) {
         handleCheckout(req, res);
     } else if (url.startsWith('/api/inventory')) {
         handleInventoryRoutes(req, res);
     } else if (url.startsWith('/api/utilities')) {
         handleUtilityRoutes(req, res);
+=======
+    } else if (url.startsWith('/api/reports')) {
+        handleReports(req, res); 
+>>>>>>> DiegoDominguez
     } else {
         res.statusCode = 404;
         res.setHeader('Content-Type', 'text/html');
