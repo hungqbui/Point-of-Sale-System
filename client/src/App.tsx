@@ -29,13 +29,13 @@ const ManagerProtectedRoute = ({ children }: any) => {
   return children;
 };
 
-const LoginRoute = () => {
+const LoginRoute = ( { registering = false } : { registering?: boolean } ) => {
   const { user } = useAuth();
   
   if (user) {
     return <Navigate to="/" replace />;
   }
-  return <Login />;
+  return <Login registering={registering} />;
 };
 
 
@@ -44,6 +44,7 @@ function App() {
     <Routes>
       <Route path="/" element={<WelcomePage />} />
       <Route path="/login" element={<LoginRoute />} />
+      <Route path="/signup" element={<LoginRoute registering={true} />} />
       <Route path="/manager" element={
         <ManagerProtectedRoute><ManagerDashboard /></ManagerProtectedRoute>} />
       <Route path="/edit-landing" element={<ManagerProtectedRoute><EditLandingPage /></ManagerProtectedRoute>} />

@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { customerLogin, customerRegister } from '../utils/customerAuth';
 import { staffLogin } from '../utils/staffAuth';
 
-interface Customer {
+export interface Customer {
     CustomerID: number;
     Email: string;
     PhoneNumber: string | null;

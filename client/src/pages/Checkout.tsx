@@ -5,6 +5,8 @@ import { createOrder } from '../utils/fetchOrder';
 import { useWelcomePage } from '../contexts/WelcomePageContext';
 import { useToaster } from '../contexts/ToastContext'; 
 import { useAuth } from '../contexts/AuthContext';
+import type { Customer } from '../contexts/AuthContext';
+
 
 const ShoppingCart: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" xmlns="http://www.w3.org/2000/svg" {...props}>
@@ -98,6 +100,8 @@ export default function FoodTruckCheckout() {
   const { pageData } = useWelcomePage();
   const { addToast } = useToaster();
 
+  const { user } = useAuth();
+
   console.log('Items in cart:', items);
   console.log('First item:', Object.values(items)[0]);
   const [formData, setFormData] = useState<FormData>({
@@ -135,21 +139,6 @@ export default function FoodTruckCheckout() {
     boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
   };
 
-  const logoStyle: React.CSSProperties = {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '45px',
-    width: '45px',
-    marginRight: '15px',
-    borderRadius: '50%',
-    backgroundColor: COLOR1,
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: '1.2em',
-    flexShrink: 0,
-    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-  };
 
   const nameStyle: React.CSSProperties = {
     fontSize: '1.6em',
@@ -202,7 +191,7 @@ export default function FoodTruckCheckout() {
         }));
 
         const payload = {
-          userId: 1, // replace with real user id if available
+          userId: (user as Customer).CustomerID, // replace with real user id if available
           orderItems: itemsArray,
           total: grandTotal,
           formData

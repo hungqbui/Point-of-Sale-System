@@ -4,10 +4,10 @@ import "./LoginPage.css";
 import { useToaster } from "../contexts/ToastContext";
 import { useAuth } from "../contexts/AuthContext";
 
-export default function LoginPage() {
+export default function LoginPage({ registering = false } : { registering?: boolean }) {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'customer' | 'staff'>('customer');
-  const [isRegistering, setIsRegistering] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(registering);
   
   const { addToast } = useToaster();
   const { login, register, loginStaff } = useAuth();
