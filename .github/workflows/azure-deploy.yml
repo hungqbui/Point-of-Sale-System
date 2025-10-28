@@ -6,15 +6,19 @@ on:
       - main
   workflow_dispatch:
 
+
 env:
   NODE_VERSION: '20.x'
   AZURE_WEBAPP_NAME: 'team4truckpos'  # Replace with your Azure App Service name
-
+  
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     
     steps:
+    - name: Azure Login
+      uses: Azure/login@v2.3.0
+
     - name: Checkout code
       uses: actions/checkout@v4
 
