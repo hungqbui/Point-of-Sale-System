@@ -1,7 +1,4 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { ShoppingCartProvider } from './contexts/ShoppingCart'
-import { ToasterProvider } from './contexts/ToastContext.tsx'
-import { WelcomePageProvider } from './contexts/WelcomePageContext.tsx'
 import Menu from './pages/Menu';
 import WelcomePage from './pages/WelcomePageDD'
 import Login from './pages/LoginPage.tsx';
@@ -13,7 +10,6 @@ import EditLandingPage from './pages/EditLandingPage.tsx';
 import ReportsPage from "./pages/ReportsPage.tsx"
 
 import { useAuth } from './contexts/AuthContext.tsx';
-
 
 const ProtectedRoute = ({ children }: any) => {
   const { user } = useAuth();
