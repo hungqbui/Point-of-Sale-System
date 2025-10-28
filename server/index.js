@@ -10,6 +10,7 @@ import { handleCheckout } from './routes/checkout.js';
 import { handleInventoryRoutes } from './routes/inventoryRoutes.js';
 import { handleUtilityRoutes } from './routes/utilityRoutes.js';
 import { handleEditPage } from './routes/editpage.js';
+import { handleNotificationRoutes } from './routes/notifications.js';
 
 import './db/connection.js';
 
@@ -26,7 +27,7 @@ async function serveStaticFile(req, res) {
     try {
         const filepath = path.join(__dirname, req.url);
         const data = await fs.readFile(filepath);
-        
+
         // Determine content type
         const ext = path.extname(filepath).toLowerCase();
         const contentTypes = {
@@ -37,7 +38,7 @@ async function serveStaticFile(req, res) {
             '.webp': 'image/webp',
             '.svg': 'image/svg+xml'
         };
-        
+
         res.statusCode = 200;
         res.setHeader('Content-Type', contentTypes[ext] || 'application/octet-stream');
         res.setHeader('Access-Control-Allow-Origin', '*');
@@ -57,6 +58,8 @@ const server = http.createServer((req, res) => {
     if (url.startsWith('/uploads/')) {
         serveStaticFile(req, res);
         return;
+    } else if (url.startsWith('/api/staff/notifications')) {
+        handleNotificationRoutes(req, res);
     } else if (url.startsWith('/api/editpage')) {
         handleEditPage(req, res);
     } else if (url.startsWith('/api/menu/')) {
@@ -72,7 +75,7 @@ const server = http.createServer((req, res) => {
     } else if (url.startsWith('/api/utilities')) {
         handleUtilityRoutes(req, res);
     } else if (url.startsWith('/api/reports')) {
-        handleReports(req, res); 
+        handleReports(req, res);
     } else {
         res.statusCode = 404;
         res.setHeader('Content-Type', 'text/html');
